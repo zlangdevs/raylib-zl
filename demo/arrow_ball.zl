@@ -1,0 +1,51 @@
+fun main() >> i32 {
+    InitWindow(800, 450, "ZLang");
+    SetTargetFPS(60);
+    
+    Color bg = Color {r = 255, g = 255, b = 0, a = 255};
+    Color black = Color {r = 0, g = 0, b = 0, a = 255};
+    i32 ball_x = 400;
+    i32 ball_y = 225;
+    bool exiting = WindowShouldClose();
+    for exiting != true {
+        BeginDrawing();
+        ClearBackground(bg.pack());
+        if IsKeyDown(KEY_RIGHT) {ball_x += 2;}
+        if IsKeyDown(KEY_LEFT) {ball_x -= 2;}
+        if IsKeyDown(KEY_UP) {ball_y -= 2;}
+        if IsKeyDown(KEY_DOWN) {ball_y += 2;}
+        DrawText("move the ball with arrow keys", 10, 10, 20, black.pack());
+        DrawCircle(ball_x, ball_y, 50.0, black.pack());
+        EndDrawing();
+    }
+
+    CloseWindow();
+    return 0;
+}
+
+... known issues
+    pack() function is needed because in SysV ABI 4-byte struct is represented as i32
+
+    bool exiting = WindowShouldClose(); ?? can not use function calls in for
+    for exiting != true { ?? can not use !exiting
+    
+    DrawText("move the ball with arrow keys", 10, 10, 20, Color{r = 0, g = 0, b = 0, a = 0});
+    Parse error at line 43: syntax error, unexpected TOKEN_LBRACE, expecting TOKEN_RPAREN
+    Parse error at test.zl:43:0: error.ParseFailed
+    
+    if IsKeyDown(KEY_RIGHT) {ball_pos.x += 2.0;}
+    if IsKeyDown(KEY_LEFT) {ball_pos.x -= 2.0;}
+    if IsKeyDown(KEY_UP) {ball_pos.y += 2.0;}
+    if IsKeyDown(KEY_DOWN) {ball_pos.y -= 2.0;}
+    Parse error at line 48: syntax error, unexpected TOKEN_REASSIGN, expecting TOKEN_SEMICOLON
+    Parse error at test.zl:48:0: error.ParseFailed
+    
+    wrap @DrawCircleV(center: Vec2, radius: f32, color: i32) >> void;    
+    struct Vec2 {
+        x f32,
+        y f32
+    }
+    DrawCircleV(ball_pos, 50.0, black.pack());
+    REASON: %Vec2 = type { float, float } should be %Vec2 = type <2 x float>
+    Another one ABI issue
+...
