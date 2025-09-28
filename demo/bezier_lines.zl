@@ -1,0 +1,52 @@
+use raylib
+
+fun main() >> i32 {
+    i32 screenWidth = 800;
+    i32 screenHeight = 450;     
+    SetConfigFlags(FLAG_MSAA_4X_HINT);
+    InitWindow(screenWidth, screenHeight, "raylib [shapes] example - lines bezier");
+    Vector2 startPoint = Vector2{x = 30.0, y = 30.0};
+    Vector2 endPoint = Vector2{x = screenWidth as f32 - 30.0, y = screenHeight as f32 - 30.0};
+    bool moveStartPoint = false;
+    bool moveEndPoint = false;
+    SetTargetFPS(60);
+    
+    Color white = Color{r = 255, g = 255, b = 255, a = 255};
+    Color red   = Color{r = 255, g = 0, b = 0, a = 255};
+    Color blue  = Color{r = 0, g = 0, b = 255, a = 255};
+    
+    bool exiting = WindowShouldClose();
+    for exiting != true {
+        simd<f32, 2> m_packed = GetMousePosition();
+        Vector2 mouse = Vector2{x = m_packed[0], y = m_packed[1]};
+        
+        if CheckCollisionPointCircle(m_packed, startPoint.vpack(), 10.0) && IsMouseButtonDown(MOUSE_BUTTON_LEFT) {moveStartPoint = true;}
+        else if CheckCollisionPointCircle(m_packed, endPoint.vpack(), 10.0) && IsMouseButtonDown(MOUSE_BUTTON_LEFT) {moveEndPoint = true;}
+        if moveStartPoint {
+            startPoint = mouse;
+            if IsMouseButtonReleased(MOUSE_BUTTON_LEFT) {moveStartPoint = false;}
+        }
+        if moveEndPoint {
+            endPoint = mouse;
+            if IsMouseButtonReleased(MOUSE_BUTTON_LEFT) {moveEndPoint = false;}
+        }
+        Color c1 = red;
+        Color c2 = red;
+        if moveStartPoint {c1 = blue;}
+        if moveEndPoint {c2 = blue;}
+        f32 s1 = 10.0;
+        f32 s2 = 10.0;
+        if moveStartPoint {s1 = 14.0;}
+        if moveEndPoint {s2 = 14.0;}
+        BeginDrawing();
+        ClearBackground(white.pack());
+        DrawText("MOVE START-END POINTS WITH MOUSE", 180, 20, 20, (255 << 24) as i32);
+        DrawLineBezier(startPoint.vpack(), endPoint.vpack(), 4.0, blue.pack());
+        DrawCircleV(startPoint.vpack(), s1, c1.pack());
+        DrawCircleV(endPoint.vpack(), s2, c2.pack());
+        EndDrawing();
+    }
+    
+    CloseWindow();
+    return 0;
+}

@@ -12,8 +12,19 @@ fun pack(self: Color) >> u32 {
            ((self.a as i32) << 24);
 }
 
+struct Vector2 {
+    x f32,
+    y f32,
+}
+
+fun vpack(self: Vector2) >> simd<f32, 2> {
+    simd<f32, 2> res = {self.x, self.y};
+    return res;
+}
+
 wrap @InitWindow(width: i32, height: i32, title: ptr<u8>) >> void;
 wrap @SetTargetFPS(fps: i32) >> void;
+wrap @SetConfigFlags(flags: u32) >> void; 
 wrap @WindowShouldClose() >> bool;
 wrap @BeginDrawing() >> void;
 wrap @EndDrawing() >> void;
@@ -21,10 +32,21 @@ wrap @CloseWindow() >> void;
 wrap @ClearBackground(color: i32) >> void;
 wrap @WindowShouldClose() >> bool;    
 wrap @IsKeyDown(key: i32) >> bool;  
+wrap @IsMouseButtonDown(button: i32)>> bool; 
+wrap @IsMouseButtonReleased(button: i32) >> bool; 
 wrap @DrawText(text: ptr<u8>, posX: i32, posY: i32, fontSize: i32, color: i32) >> void;
 wrap @DrawCircle(centerX: i32, centerY: i32, radius: f32, color: i32) >> void;  
+wrap @DrawCircleV(center: simd<f32, 2>, radius: f32, color: i32) >> void;
+wrap @DrawLineBezier(startPos: simd<f32, 2>, endPos: simd<f32, 2>, thick: f32, color: i32) >> void; 
+wrap @CheckCollisionPointCircle(point: simd<f32, 2>, center: simd<f32, 2>, radius: f32) >> bool; 
+wrap @GetMousePosition() >> simd<f32, 2>;
 
 i32 KEY_RIGHT = 262;
 i32 KEY_LEFT = 263;
 i32 KEY_DOWN = 264;
 i32 KEY_UP = 265;
+
+i32 MOUSE_BUTTON_LEFT    = 0;
+i32 MOUSE_BUTTON_RIGHT   = 1;
+
+u32 FLAG_MSAA_4X_HINT = 0x00000020;
