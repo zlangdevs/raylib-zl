@@ -16,6 +16,9 @@ In `demo/` directory there are examples of using raylib in ZLang.
 ```bash
 ./zlang demo/arrow_ball.zl raylib.zl -link bin/libraylib.a -lGL -lm -lpthread -ldl -lrt -lX11 && ./output
 ```
+#### Screenshot
+<img width="825" height="466" alt="image" src="https://github.com/user-attachments/assets/00ba60a6-3eba-4bc6-8d67-4b50fa320da7" />
+
 
 ## ABI Problems
 ZLang doesn't support C ABI yet, so, there are problems with some structs from Raylib. For example, to pass argument of type Color, you should to use Color.pack() method. These aspects are shown in examples 
