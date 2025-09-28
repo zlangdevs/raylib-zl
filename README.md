@@ -16,8 +16,9 @@ In `demo/` directory there are examples of using raylib in ZLang.
 ```bash
 ./zlang demo/arrow_ball.zl raylib.zl -link bin/libraylib.a -lGL -lm -lpthread -ldl -lrt -lX11 && ./output
 ```
-#### Screenshot
+### Screenshots
 <img width="825" height="466" alt="image" src="https://github.com/user-attachments/assets/00ba60a6-3eba-4bc6-8d67-4b50fa320da7" />
+<img width="812" height="466" alt="image" src="https://github.com/user-attachments/assets/583ddd97-faaf-44b9-83b3-bf8b951b505f" />
 
 
 ## ABI Problems
