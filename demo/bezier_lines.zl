@@ -17,11 +17,9 @@ fun main() >> i32 {
     
     bool exiting = WindowShouldClose();
     for exiting != true {
-        simd<f32, 2> m_packed = GetMousePosition();
-        Vector2 mouse = Vector2{x = m_packed[0], y = m_packed[1]};
-        
-        if CheckCollisionPointCircle(m_packed, startPoint.vpack(), 10.0) && IsMouseButtonDown(MOUSE_BUTTON_LEFT) {moveStartPoint = true;}
-        else if CheckCollisionPointCircle(m_packed, endPoint.vpack(), 10.0) && IsMouseButtonDown(MOUSE_BUTTON_LEFT) {moveEndPoint = true;}
+        Vector2 mouse = GetMousePosition();        
+        if CheckCollisionPointCircle(mouse, startPoint, 10.0) && IsMouseButtonDown(MOUSE_BUTTON_LEFT) {moveStartPoint = true;}
+        else if CheckCollisionPointCircle(mouse, endPoint, 10.0) && IsMouseButtonDown(MOUSE_BUTTON_LEFT) {moveEndPoint = true;}
         if moveStartPoint {
             startPoint = mouse;
             if IsMouseButtonReleased(MOUSE_BUTTON_LEFT) {moveStartPoint = false;}
@@ -41,9 +39,9 @@ fun main() >> i32 {
         BeginDrawing();
         ClearBackground(white.pack());
         DrawText("MOVE START-END POINTS WITH MOUSE", 180, 20, 20, (255 << 24) as i32);
-        DrawLineBezier(startPoint.vpack(), endPoint.vpack(), 4.0, blue.pack());
-        DrawCircleV(startPoint.vpack(), s1, c1.pack());
-        DrawCircleV(endPoint.vpack(), s2, c2.pack());
+        DrawLineBezier(startPoint, endPoint, 4.0, blue);
+        DrawCircleV(startPoint, s1, c1);
+        DrawCircleV(endPoint, s2, c2);
         EndDrawing();
     }
     

@@ -12,6 +12,13 @@ fun pack(self: Color) >> u32 {
            ((self.a as i32) << 24);
 }
 
+fun cpack(self: Color) >> u32 {
+    return (self.r as i32) |
+           ((self.g as i32) << 8) |
+           ((self.b as i32) << 16) |
+           ((self.a as i32) << 24);
+}
+
 struct Vector2 {
     x f32,
     y f32,
@@ -19,6 +26,11 @@ struct Vector2 {
 
 fun vpack(self: Vector2) >> simd<f32, 2> {
     simd<f32, 2> res = {self.x, self.y};
+    return res;
+}
+
+fun vunpack(self: simd<f32, 2>) >> Vector2 {
+    Vector2 res = Vector2{x = self[0], y = self[1]};
     return res;
 }
 
@@ -36,10 +48,16 @@ wrap @IsMouseButtonDown(button: i32)>> bool;
 wrap @IsMouseButtonReleased(button: i32) >> bool; 
 wrap @DrawText(text: ptr<u8>, posX: i32, posY: i32, fontSize: i32, color: i32) >> void;
 wrap @DrawCircle(centerX: i32, centerY: i32, radius: f32, color: i32) >> void;  
-wrap @DrawCircleV(center: simd<f32, 2>, radius: f32, color: i32) >> void;
-wrap @DrawLineBezier(startPos: simd<f32, 2>, endPos: simd<f32, 2>, thick: f32, color: i32) >> void; 
-wrap @CheckCollisionPointCircle(point: simd<f32, 2>, center: simd<f32, 2>, radius: f32) >> bool; 
-wrap @GetMousePosition() >> simd<f32, 2>;
+fun  @DrawCircleV(center: simd<f32, 2>, radius: f32, color: i32) >> void;
+fun  DrawCircleV(center: Vector2, radius: f32, color: Color) >> void {@DrawCircleV(center.vpack(), radius, color.cpack());}
+fun  @DrawLineBezier(startPos: simd<f32, 2>, endPos: simd<f32, 2>, thick: f32, color: i32) >> void; 
+fun  DrawLineBezier(startPos: Vector2, endPos: Vector2, thick: f32, color: Color) >> void {
+@DrawLineBezier(startPos.vpack(), endPos.vpack(), thick, color.cpack());}
+fun  @CheckCollisionPointCircle(point: simd<f32, 2>, center: simd<f32, 2>, radius: f32) >> bool; 
+fun  CheckCollisionPointCircle(point: Vector2, center: Vector2, radius: f32) >> bool{
+return @CheckCollisionPointCircle(point.vpack(), center.vpack(), radius);}
+fun  @GetMousePosition() >> simd<f32, 2>;
+fun  GetMousePosition() >> Vector2 {return vunpack(@GetMousePosition());}
 
 i32 KEY_RIGHT = 262;
 i32 KEY_LEFT = 263;
