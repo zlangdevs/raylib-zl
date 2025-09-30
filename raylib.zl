@@ -37,6 +37,7 @@ fun v4unpack(self: simd<f32, 4>) >> Vector4 {
 }
 
 struct Matrix { ?? L239
+    m0   f32,
     m1   f32,
     m2   f32,
     m3   f32,
@@ -92,6 +93,49 @@ struct Camera3D { ?? L326
     up          Vector3,
     fovy        float,
     projection  i32
+}
+
+?? GenMeshHeightmap
+struct Mesh { ?? L345
+    vertexCount     i32,
+    triangleCount   i32,
+    vertices        ptr<f32>,
+    texcoords       ptr<f32>,
+    texcoords2      ptr<f32>,
+    normals         ptr<f32>,
+    tangents        ptr<f32>,
+    colors          ptr<u8>,
+    indices         ptr<u16>,
+    animVertices    ptr<f32>,
+    animNormals     ptr<f32>,
+    boneIds         ptr<u8>,
+    boneWeights     ptr<f32>,
+    boneMatrices    ptr<Matrix>,
+    boneCount       i32,
+    vaoId           u32,
+    vboId           ptr<u32>,
+}
+
+struct Shader { ?? L372
+    id      u32,
+    locs    ptr<int>,
+}
+
+struct MaterialMap { ?? L378
+    texture     Texture2D,
+    color       Color,
+    value       f32,
+}
+
+struct Transform { ?? L392
+    translation Vector3,
+    rotation    simd<f32, 4>,
+    scale       Vector3,
+}
+
+struct BoneInfo { ?? L399
+    name    arr<u8, 32>,
+    parent  i32,
 }
 
 u32 FLAG_MSAA_4X_HINT = 0x00000020; ?? L556
