@@ -36,6 +36,24 @@ fun v4unpack(self: simd<f32, 4>) >> Vector4 {
     return res;
 }
 
+struct Matrix { ?? L239
+    m1   f32,
+    m2   f32,
+    m3   f32,
+    m4   f32,
+    m5   f32,
+    m6   f32,
+    m7   f32,
+    m8   f32,
+    m9   f32,
+    m10  f32,
+    m11  f32,
+    m12  f32,
+    m13  f32,
+    m14  f32,
+    m15  f32,
+}
+
 struct Color { ?? L247
     r u8,
     g u8,
@@ -48,6 +66,32 @@ fun cpack(self: Color) >> u32 {
            ((self.g as i32) << 8) |
            ((self.b as i32) << 16) |
            ((self.a as i32) << 24);
+}
+
+?? LoadImage
+struct Image { ?? L263
+    data    ptr<void>,
+    width   i32,
+    height  i32,
+    mipmaps i32,
+    format  i32,
+}
+
+?? LoadTextureFromImage
+struct Texture { ?? L272
+    id      u32,
+    width   i32,
+    height  i32,
+    mipmaps i32,
+    format  i32,
+}
+
+struct Camera3D { ?? L326
+    position    Vector3,
+    target      Vector3,
+    up          Vector3,
+    fovy        float,
+    projection  i32
 }
 
 u32 FLAG_MSAA_4X_HINT = 0x00000020; ?? L556
