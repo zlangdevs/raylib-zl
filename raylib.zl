@@ -3,13 +3,36 @@ struct Vector2 { ?? L215
     y f32,
 }
 
-fun vpack(self: Vector2) >> simd<f32, 2> {
+fun v2pack(self: Vector2) >> simd<f32, 2> {
     simd<f32, 2> res = {self.x, self.y};
     return res;
 }
 
-fun vunpack(self: simd<f32, 2>) >> Vector2 {
+fun v2unpack(self: simd<f32, 2>) >> Vector2 {
     Vector2 res = Vector2{x = self[0], y = self[1]};
+    return res;
+}
+
+struct Vector3 { ?? L221
+    x f32,
+    y f32,
+    z f32,
+}
+
+struct Vector4 { ?? L228
+    x f32,
+    y f32,
+    z f32,
+    w f32,
+}
+
+fun v4pack(self: Vector4) >> simd<f32, 4> {
+    simd<f32, 4> res = {self.x, self.y, self.z, self.w};
+    return res;
+}
+
+fun v4unpack(self: simd<f32, 4>) >> Vector4 {
+    Vector4 res = Vector4{x = self[0], y = self[1], z = self[2], w = self[3]};
     return res;
 }
 
@@ -55,21 +78,21 @@ wrap @IsKeyDown(key: i32) >> bool; ?? L1185
 wrap @IsMouseButtonDown(button: i32)>> bool; ?? L1208
 wrap @IsMouseButtonReleased(button: i32) >> bool; ?? L1209
 fun  @GetMousePosition() >> simd<f32, 2>; ?? L1213
-fun  GetMousePosition() >> Vector2 {return vunpack(@GetMousePosition());}
+fun  GetMousePosition() >> Vector2 {return v2unpack(@GetMousePosition());}
 
 fun  @DrawLineBezier(startPos: simd<f32, 2>, endPos: simd<f32, 2>, thick: f32, color: i32) >> void; ?? L1264
 fun  DrawLineBezier(startPos: Vector2, endPos: Vector2, thick: f32, color: Color) >> void {
-@DrawLineBezier(startPos.vpack(), endPos.vpack(), thick, color.cpack());}
+@DrawLineBezier(startPos.v2pack(), endPos.v2pack(), thick, color.cpack());}
 
 fun  @CheckCollisionPointCircle(point: simd<f32, 2>, center: simd<f32, 2>, radius: f32) >> bool; ?? L1323
 fun  CheckCollisionPointCircle(point: Vector2, center: Vector2, radius: f32) >> bool{
-return @CheckCollisionPointCircle(point.vpack(), center.vpack(), radius);}
+return @CheckCollisionPointCircle(point.v2pack(), center.v2pack(), radius);}
 
 fun  @DrawCircle(centerX: i32, centerY: i32, radius: f32, color: i32) >> void;  ?? L1406
 fun  DrawCircle(centerX: i32, centerY: i32, radius: f32, color: Color) >> void{
 @DrawCircle(centerX, centerY, radius, color.cpack());} 
 fun  @DrawCircleV(center: simd<f32, 2>, radius: f32, color: i32) >> void; ?? L1407
-fun  DrawCircleV(center: Vector2, radius: f32, color: Color) >> void {@DrawCircleV(center.vpack(), radius, color.cpack());}
+fun  DrawCircleV(center: Vector2, radius: f32, color: Color) >> void {@DrawCircleV(center.v2pack(), radius, color.cpack());}
 
 fun  @DrawText(text: ptr<u8>, posX: i32, posY: i32, fontSize: i32, color: i32) >> void; ?? L1487
 fun  DrawText(text: ptr<u8>, posX: i32, posY: i32, fontSize: i32, color: Color) >> void{
