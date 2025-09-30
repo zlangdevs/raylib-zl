@@ -5,13 +5,6 @@ struct Color {
     a u8,
 }
 
-fun pack(self: Color) >> u32 {
-    return (self.r as i32) |
-           ((self.g as i32) << 8) |
-           ((self.b as i32) << 16) |
-           ((self.a as i32) << 24);
-}
-
 fun cpack(self: Color) >> u32 {
     return (self.r as i32) |
            ((self.g as i32) << 8) |
@@ -41,13 +34,18 @@ wrap @WindowShouldClose() >> bool;
 wrap @BeginDrawing() >> void;
 wrap @EndDrawing() >> void;
 wrap @CloseWindow() >> void;
-wrap @ClearBackground(color: i32) >> void;
+fun  @ClearBackground(color: i32) >> void;
+fun  ClearBackground(color: Color) >> void {@ClearBackground(color.cpack());}
 wrap @WindowShouldClose() >> bool;    
 wrap @IsKeyDown(key: i32) >> bool;  
 wrap @IsMouseButtonDown(button: i32)>> bool; 
 wrap @IsMouseButtonReleased(button: i32) >> bool; 
-wrap @DrawText(text: ptr<u8>, posX: i32, posY: i32, fontSize: i32, color: i32) >> void;
-wrap @DrawCircle(centerX: i32, centerY: i32, radius: f32, color: i32) >> void;  
+fun  @DrawText(text: ptr<u8>, posX: i32, posY: i32, fontSize: i32, color: i32) >> void;
+fun  DrawText(text: ptr<u8>, posX: i32, posY: i32, fontSize: i32, color: Color) >> void{
+@DrawText(text, posX, posY, fontSize, color.cpack());}
+fun  @DrawCircle(centerX: i32, centerY: i32, radius: f32, color: i32) >> void;  
+fun  DrawCircle(centerX: i32, centerY: i32, radius: f32, color: Color) >> void{
+@DrawCircle(centerX, centerY, radius, color.cpack());} 
 fun  @DrawCircleV(center: simd<f32, 2>, radius: f32, color: i32) >> void;
 fun  DrawCircleV(center: Vector2, radius: f32, color: Color) >> void {@DrawCircleV(center.vpack(), radius, color.cpack());}
 fun  @DrawLineBezier(startPos: simd<f32, 2>, endPos: simd<f32, 2>, thick: f32, color: i32) >> void; 

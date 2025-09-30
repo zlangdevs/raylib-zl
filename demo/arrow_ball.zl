@@ -11,13 +11,13 @@ fun main() >> i32 {
     bool exiting = WindowShouldClose();
     for exiting != true {
         BeginDrawing();
-        ClearBackground(bg.pack());
+        ClearBackground(bg);
         if IsKeyDown(KEY_RIGHT) {ball_x += 2;}
         if IsKeyDown(KEY_LEFT) {ball_x -= 2;}
         if IsKeyDown(KEY_UP) {ball_y -= 2;}
         if IsKeyDown(KEY_DOWN) {ball_y += 2;}
-        DrawText("move the ball with arrow keys", 10, 10, 20, black.pack());
-        DrawCircle(ball_x, ball_y, 50.0, black.pack());
+        DrawText("move the ball with arrow keys", 10, 10, 20, black);
+        DrawCircle(ball_x, ball_y, 50.0, black);
         EndDrawing();
     }
 
