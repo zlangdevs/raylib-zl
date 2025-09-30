@@ -69,7 +69,6 @@ fun cpack(self: Color) >> u32 {
            ((self.a as i32) << 24);
 }
 
-?? LoadImage
 struct Image { ?? L263
     data    ptr<void>,
     width   i32,
@@ -78,7 +77,6 @@ struct Image { ?? L263
     format  i32,
 }
 
-?? LoadTextureFromImage
 struct Texture { ?? L272
     id      u32,
     width   i32,
@@ -95,7 +93,6 @@ struct Camera3D { ?? L326
     projection  i32
 }
 
-?? GenMeshHeightmap
 struct Mesh { ?? L345
     vertexCount     i32,
     triangleCount   i32,
@@ -138,6 +135,18 @@ struct BoneInfo { ?? L399
     parent  i32,
 }
 
+struct Model { ?? L405
+    transform       Matrix,
+    meshCount       i32,
+    materialCount   i32,
+    meshes          ptr<Mesh>,
+    materials       ptr<Materials>,
+    meshMaterial    ptr<i32>,
+    boneCount       i32,
+    bones           ptr<BoneInfo>,
+    bindPose        Transform,
+}
+
 u32 FLAG_MSAA_4X_HINT = 0x00000020; ?? L556
 
 i32 KEY_RIGHT = 262; ?? L634
@@ -157,6 +166,9 @@ fun  ClearBackground(color: Color) >> void {@ClearBackground(color.cpack());}
 wrap @BeginDrawing() >> void; ?? L1033
 wrap @EndDrawing() >> void; ?? L1034
 
+wrap @BeginMode3D(camera: Camera3D) >> void; ?? L1037
+wrap @EndMode3D() >> void; ?? L1038
+
 wrap @SetTargetFPS(fps: i32) >> void; ?? L1079
 
 wrap @SetConfigFlags(flags: u32) >> void; ?? L1100
@@ -168,20 +180,39 @@ wrap @IsMouseButtonReleased(button: i32) >> bool; ?? L1209
 fun  @GetMousePosition() >> simd<f32, 2>; ?? L1213
 fun  GetMousePosition() >> Vector2 {return v2unpack(@GetMousePosition());}
 
+wrap @UpdateCamera(camera: ptr<Camera3D>, mode: i32) >> void; ?? L1244
+
 fun  @DrawLineBezier(startPos: simd<f32, 2>, endPos: simd<f32, 2>, thick: f32, color: i32) >> void; ?? L1264
 fun  DrawLineBezier(startPos: Vector2, endPos: Vector2, thick: f32, color: Color) >> void {
 @DrawLineBezier(startPos.v2pack(), endPos.v2pack(), thick, color.cpack());}
+fun  @DrawCircle(centerX: i32, centerY: i32, radius: f32, color: i32) >> void;  ?? L1265
+fun  DrawCircle(centerX: i32, centerY: i32, radius: f32, color: Color) >> void{
+@DrawCircle(centerX, centerY, radius, color.cpack());} 
+fun  @DrawCircleV(center: simd<f32, 2>, radius: f32, color: i32) >> void; ?? L1269
+fun  DrawCircleV(center: Vector2, radius: f32, color: Color) >> void {@DrawCircleV(center.v2pack(), radius, color.cpack());}
+wrap @DrawRectangleLines(posX: i32, posY: i32, width :i32, height: i32, color: Color) >> void; ?? L1285
 
 fun  @CheckCollisionPointCircle(point: simd<f32, 2>, center: simd<f32, 2>, radius: f32) >> bool; ?? L1323
 fun  CheckCollisionPointCircle(point: Vector2, center: Vector2, radius: f32) >> bool{
 return @CheckCollisionPointCircle(point.v2pack(), center.v2pack(), radius);}
 
-fun  @DrawCircle(centerX: i32, centerY: i32, radius: f32, color: i32) >> void;  ?? L1406
-fun  DrawCircle(centerX: i32, centerY: i32, radius: f32, color: Color) >> void{
-@DrawCircle(centerX, centerY, radius, color.cpack());} 
-fun  @DrawCircleV(center: simd<f32, 2>, radius: f32, color: i32) >> void; ?? L1407
-fun  DrawCircleV(center: Vector2, radius: f32, color: Color) >> void {@DrawCircleV(center.v2pack(), radius, color.cpack());}
+wrap @LoadImage(fileName: ptr<u8>) >> Image; ?? 1336
+wrap @UnloadImage(image: Image) >> void; ?? L1344
+
+wrap @LoadTextureFromImage(image: Image) >> Texture; ?? L1426
+wrap @UnloadTexture(texture: Texture2D) >> void;
+wrap @UpdateTexture(texture: Texture2D, pixels: ptr<void>) >> void;
+
+wrap @DrawTexture(texture: Texture2D, posX: i32, posY: i32, tint: Color) >> void; ?? L1442
 
 fun  @DrawText(text: ptr<u8>, posX: i32, posY: i32, fontSize: i32, color: i32) >> void; ?? L1487
 fun  DrawText(text: ptr<u8>, posX: i32, posY: i32, fontSize: i32, color: Color) >> void{
 @DrawText(text, posX, posY, fontSize, color.cpack());}
+
+wrap @DrawGrid(slices: i32, spacing: f32) >> void; ?? L1564
+
+wrap @LoadModelFromMesh(mesh: Mesh) >> Model; ?? L1572
+
+wrap @DrawModel(model: Model, position: Vector3, scale: scale, tint: Color) >> void; ?? L1578
+
+wrap @GenMeshHeightmap(heightmap: Image, size: Vector3) >> Mesh; ?? L1610
