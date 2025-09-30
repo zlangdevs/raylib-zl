@@ -1,18 +1,4 @@
-struct Color {
-    r u8,
-    g u8,
-    b u8,
-    a u8,
-}
-
-fun cpack(self: Color) >> u32 {
-    return (self.r as i32) |
-           ((self.g as i32) << 8) |
-           ((self.b as i32) << 16) |
-           ((self.a as i32) << 24);
-}
-
-struct Vector2 {
+struct Vector2 { ?? L215
     x f32,
     y f32,
 }
@@ -27,42 +13,64 @@ fun vunpack(self: simd<f32, 2>) >> Vector2 {
     return res;
 }
 
-wrap @InitWindow(width: i32, height: i32, title: ptr<u8>) >> void;
-wrap @SetTargetFPS(fps: i32) >> void;
-wrap @SetConfigFlags(flags: u32) >> void; 
-wrap @WindowShouldClose() >> bool;
-wrap @BeginDrawing() >> void;
-wrap @EndDrawing() >> void;
-wrap @CloseWindow() >> void;
-fun  @ClearBackground(color: i32) >> void;
+struct Color { ?? L247
+    r u8,
+    g u8,
+    b u8,
+    a u8,
+}
+
+fun cpack(self: Color) >> u32 {
+    return (self.r as i32) |
+           ((self.g as i32) << 8) |
+           ((self.b as i32) << 16) |
+           ((self.a as i32) << 24);
+}
+
+u32 FLAG_MSAA_4X_HINT = 0x00000020; ?? L556
+
+i32 KEY_RIGHT = 262; ?? L634
+i32 KEY_LEFT = 263; ??
+i32 KEY_DOWN = 264; ??
+i32 KEY_UP = 265; ??637
+
+i32 MOUSE_BUTTON_LEFT    = 0; ?? L700
+i32 MOUSE_BUTTON_RIGHT   = 1; ?? L701
+
+wrap @InitWindow(width: i32, height: i32, title: ptr<u8>) >> void; ?? L973
+wrap @CloseWindow() >> void; ?? L974
+wrap @WindowShouldClose() >> bool; ?? L975
+
+fun  @ClearBackground(color: i32) >> void; ?? L1032
 fun  ClearBackground(color: Color) >> void {@ClearBackground(color.cpack());}
-wrap @WindowShouldClose() >> bool;    
-wrap @IsKeyDown(key: i32) >> bool;  
-wrap @IsMouseButtonDown(button: i32)>> bool; 
-wrap @IsMouseButtonReleased(button: i32) >> bool; 
-fun  @DrawText(text: ptr<u8>, posX: i32, posY: i32, fontSize: i32, color: i32) >> void;
-fun  DrawText(text: ptr<u8>, posX: i32, posY: i32, fontSize: i32, color: Color) >> void{
-@DrawText(text, posX, posY, fontSize, color.cpack());}
-fun  @DrawCircle(centerX: i32, centerY: i32, radius: f32, color: i32) >> void;  
-fun  DrawCircle(centerX: i32, centerY: i32, radius: f32, color: Color) >> void{
-@DrawCircle(centerX, centerY, radius, color.cpack());} 
-fun  @DrawCircleV(center: simd<f32, 2>, radius: f32, color: i32) >> void;
-fun  DrawCircleV(center: Vector2, radius: f32, color: Color) >> void {@DrawCircleV(center.vpack(), radius, color.cpack());}
-fun  @DrawLineBezier(startPos: simd<f32, 2>, endPos: simd<f32, 2>, thick: f32, color: i32) >> void; 
-fun  DrawLineBezier(startPos: Vector2, endPos: Vector2, thick: f32, color: Color) >> void {
-@DrawLineBezier(startPos.vpack(), endPos.vpack(), thick, color.cpack());}
-fun  @CheckCollisionPointCircle(point: simd<f32, 2>, center: simd<f32, 2>, radius: f32) >> bool; 
-fun  CheckCollisionPointCircle(point: Vector2, center: Vector2, radius: f32) >> bool{
-return @CheckCollisionPointCircle(point.vpack(), center.vpack(), radius);}
-fun  @GetMousePosition() >> simd<f32, 2>;
+wrap @BeginDrawing() >> void; ?? L1033
+wrap @EndDrawing() >> void; ?? L1034
+
+wrap @SetTargetFPS(fps: i32) >> void; ?? L1079
+
+wrap @SetConfigFlags(flags: u32) >> void; ?? L1100
+
+wrap @IsKeyDown(key: i32) >> bool; ?? L1185
+
+wrap @IsMouseButtonDown(button: i32)>> bool; ?? L1208
+wrap @IsMouseButtonReleased(button: i32) >> bool; ?? L1209
+fun  @GetMousePosition() >> simd<f32, 2>; ?? L1213
 fun  GetMousePosition() >> Vector2 {return vunpack(@GetMousePosition());}
 
-i32 KEY_RIGHT = 262;
-i32 KEY_LEFT = 263;
-i32 KEY_DOWN = 264;
-i32 KEY_UP = 265;
+fun  @DrawLineBezier(startPos: simd<f32, 2>, endPos: simd<f32, 2>, thick: f32, color: i32) >> void; ?? L1264
+fun  DrawLineBezier(startPos: Vector2, endPos: Vector2, thick: f32, color: Color) >> void {
+@DrawLineBezier(startPos.vpack(), endPos.vpack(), thick, color.cpack());}
 
-i32 MOUSE_BUTTON_LEFT    = 0;
-i32 MOUSE_BUTTON_RIGHT   = 1;
+fun  @CheckCollisionPointCircle(point: simd<f32, 2>, center: simd<f32, 2>, radius: f32) >> bool; ?? L1323
+fun  CheckCollisionPointCircle(point: Vector2, center: Vector2, radius: f32) >> bool{
+return @CheckCollisionPointCircle(point.vpack(), center.vpack(), radius);}
 
-u32 FLAG_MSAA_4X_HINT = 0x00000020;
+fun  @DrawCircle(centerX: i32, centerY: i32, radius: f32, color: i32) >> void;  ?? L1406
+fun  DrawCircle(centerX: i32, centerY: i32, radius: f32, color: Color) >> void{
+@DrawCircle(centerX, centerY, radius, color.cpack());} 
+fun  @DrawCircleV(center: simd<f32, 2>, radius: f32, color: i32) >> void; ?? L1407
+fun  DrawCircleV(center: Vector2, radius: f32, color: Color) >> void {@DrawCircleV(center.vpack(), radius, color.cpack());}
+
+fun  @DrawText(text: ptr<u8>, posX: i32, posY: i32, fontSize: i32, color: i32) >> void; ?? L1487
+fun  DrawText(text: ptr<u8>, posX: i32, posY: i32, fontSize: i32, color: Color) >> void{
+@DrawText(text, posX, posY, fontSize, color.cpack());}
