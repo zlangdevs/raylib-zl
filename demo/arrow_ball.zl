@@ -19,6 +19,7 @@ fun main() >> i32 {
         DrawText("move the ball with arrow keys", 10, 10, 20, black);
         DrawCircle(ball_x, ball_y, 50.0, black);
         EndDrawing();
+        exiting = WindowShouldClose();
     }
 
     CloseWindow();

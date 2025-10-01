@@ -44,6 +44,7 @@ fun main() >> i32 {
         DrawCircleV(startPoint, s1, c1);
         DrawCircleV(endPoint, s2, c2);
         EndDrawing();
+        exiting = WindowShouldClose();
     }
     
     CloseWindow();
