@@ -89,8 +89,8 @@ struct Camera3D { ?? L326
     position    Vector3,
     target      Vector3,
     up          Vector3,
-    fovy        float,
-    projection  i32
+    fovy        f32,
+    projection  i32,
 }
 
 struct Mesh { ?? L345
@@ -119,8 +119,8 @@ struct Shader { ?? L372
 }
 
 struct MaterialMap { ?? L378
-    texture     Texture2D,
-    color       Color,
+    texture     Texture,
+    color       i32,
     value       f32,
 }
 
@@ -135,16 +135,22 @@ struct BoneInfo { ?? L399
     parent  i32,
 }
 
+struct Material { ?? L385
+    shader  Shader,
+    maps    ptr<MaterialMap>,
+    params  arr<f32, 4>,
+}
+
 struct Model { ?? L405
     transform       Matrix,
     meshCount       i32,
     materialCount   i32,
     meshes          ptr<Mesh>,
-    materials       ptr<Materials>,
+    materials       ptr<Material>,
     meshMaterial    ptr<i32>,
     boneCount       i32,
     bones           ptr<BoneInfo>,
-    bindPose        Transform,
+    bindPose        ptr<Transform>,
 }
 
 u32 FLAG_MSAA_4X_HINT = 0x00000020; ?? L556
@@ -156,6 +162,12 @@ i32 KEY_UP = 265; ??637
 
 i32 MOUSE_BUTTON_LEFT    = 0; ?? L700
 i32 MOUSE_BUTTON_RIGHT   = 1; ?? L701
+
+i32 MATERIAL_MAP_DIFFUSE = 0; ?? L771
+
+i32 CAMERA_ORBITAL       = 2; ?? L933
+
+i32 CAMERA_PERSPECTIVE   = 0; ?? L940
 
 wrap @InitWindow(width: i32, height: i32, title: ptr<u8>) >> void; ?? L973
 wrap @CloseWindow() >> void; ?? L974
@@ -190,7 +202,9 @@ fun  DrawCircle(centerX: i32, centerY: i32, radius: f32, color: Color) >> void{
 @DrawCircle(centerX, centerY, radius, color.cpack());} 
 fun  @DrawCircleV(center: simd<f32, 2>, radius: f32, color: i32) >> void; ?? L1269
 fun  DrawCircleV(center: Vector2, radius: f32, color: Color) >> void {@DrawCircleV(center.v2pack(), radius, color.cpack());}
-wrap @DrawRectangleLines(posX: i32, posY: i32, width :i32, height: i32, color: Color) >> void; ?? L1285
+fun  @DrawRectangleLines(posX: i32, posY: i32, width :i32, height: i32, color: i32) >> void; ?? L1285
+fun  DrawRectangleLines(posX: i32, posY: i32, width :i32, height: i32, color: Color) >> void{
+@DrawRectangleLines(posX, posY, width, height, color.cpack());}
 
 fun  @CheckCollisionPointCircle(point: simd<f32, 2>, center: simd<f32, 2>, radius: f32) >> bool; ?? L1323
 fun  CheckCollisionPointCircle(point: Vector2, center: Vector2, radius: f32) >> bool{
@@ -200,10 +214,12 @@ wrap @LoadImage(fileName: ptr<u8>) >> Image; ?? 1336
 wrap @UnloadImage(image: Image) >> void; ?? L1344
 
 wrap @LoadTextureFromImage(image: Image) >> Texture; ?? L1426
-wrap @UnloadTexture(texture: Texture2D) >> void;
-wrap @UpdateTexture(texture: Texture2D, pixels: ptr<void>) >> void;
+wrap @UnloadTexture(texture: Texture) >> void; ?? L1420
+wrap @UpdateTexture(texture: Texture, pixels: ptr<void>) >> void;
 
-wrap @DrawTexture(texture: Texture2D, posX: i32, posY: i32, tint: Color) >> void; ?? L1442
+fun  @DrawTexture(texture: Texture, posX: i32, posY: i32, tint: i32) >> void; ?? L1442
+fun  DrawTexture(texture: Texture, posX: i32, posY: i32, tint: Color) >> void{
+@DrawTexture(texture, posX, posY, tint.cpack());}
 
 fun  @DrawText(text: ptr<u8>, posX: i32, posY: i32, fontSize: i32, color: i32) >> void; ?? L1487
 fun  DrawText(text: ptr<u8>, posX: i32, posY: i32, fontSize: i32, color: Color) >> void{
@@ -212,7 +228,10 @@ fun  DrawText(text: ptr<u8>, posX: i32, posY: i32, fontSize: i32, color: Color) 
 wrap @DrawGrid(slices: i32, spacing: f32) >> void; ?? L1564
 
 wrap @LoadModelFromMesh(mesh: Mesh) >> Model; ?? L1572
+wrap @UnloadModel(model: Model) >> void;
 
-wrap @DrawModel(model: Model, position: Vector3, scale: scale, tint: Color) >> void; ?? L1578
+fun @DrawModel(model: Model, position: Vector3, scale: f32, tint: i32) >> void; ?? L1578
+fun DrawModel(model: Model, position: Vector3, scale: f32, tint: Color) >> void{
+@DrawModel(model, position, scale, tint.cpack());}
 
 wrap @GenMeshHeightmap(heightmap: Image, size: Vector3) >> Mesh; ?? L1610

@@ -16,4 +16,13 @@
     
     simd<f32, 2> m_packed = vpack(mouse); <- works
     simd<f32, 2> m_packed = mouse.vpack(); <- compilation error
+    
+    camera.position = Vector3{x = 18.0, y = 21.0, z = 18.0};
+    Results to
+    Type mismatch at line 10: cannot convert ptr to struct
+    Error generating code: Type mismatch in code generation.
+    But this:
+    Vector3 c_pos = Vector3{x = 18.0, y = 21.0, z = 18.0};
+    camera.position = c_pos;
+    works fine
 ...
