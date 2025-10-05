@@ -6,23 +6,4 @@
     DrawText("move the ball with arrow keys", 10, 10, 20, Color{r = 0, g = 0, b = 0, a = 0});
     Parse error at line 43: syntax error, unexpected TOKEN_LBRACE, expecting TOKEN_RPAREN
     Parse error at test.zl:43:0: error.ParseFailed
-    
-    if IsKeyDown(KEY_RIGHT) {ball_pos.x += 2.0;}
-    if IsKeyDown(KEY_LEFT) {ball_pos.x -= 2.0;}
-    if IsKeyDown(KEY_UP) {ball_pos.y += 2.0;}
-    if IsKeyDown(KEY_DOWN) {ball_pos.y -= 2.0;}
-    Parse error at line 48: syntax error, unexpected TOKEN_REASSIGN, expecting TOKEN_SEMICOLON
-    Parse error at test.zl:48:0: error.ParseFailed
-    
-    simd<f32, 2> m_packed = vpack(mouse); <- works
-    simd<f32, 2> m_packed = mouse.vpack(); <- compilation error
-    
-    camera.position = Vector3{x = 18.0, y = 21.0, z = 18.0};
-    Results to
-    Type mismatch at line 10: cannot convert ptr to struct
-    Error generating code: Type mismatch in code generation.
-    But this:
-    Vector3 c_pos = Vector3{x = 18.0, y = 21.0, z = 18.0};
-    camera.position = c_pos;
-    works fine
 ...
