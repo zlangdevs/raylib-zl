@@ -2,8 +2,4 @@
 
     bool exiting = WindowShouldClose(); ?? can not use function calls in for
     for exiting != true { ?? can not use !exiting
-    
-    DrawText("move the ball with arrow keys", 10, 10, 20, Color{r = 0, g = 0, b = 0, a = 0});
-    Parse error at line 43: syntax error, unexpected TOKEN_LBRACE, expecting TOKEN_RPAREN
-    Parse error at test.zl:43:0: error.ParseFailed
 ...
