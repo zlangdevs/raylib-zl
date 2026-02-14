@@ -41,5 +41,9 @@ zig-out/bin/zlang demo/neon_grid_3d.zl raylib.full.zl -o demo/neon_grid_3d
 ## Demo
 - `demo/neon_grid_3d.zl` - interactive polyforge reactor (animated 3D tower field + reactor core + orbiting energy nodes)
 
+### Screenshot
+<img width="1432" height="889" alt="image" src="https://github.com/user-attachments/assets/1bdb5e05-ef91-4fcd-bebf-40a9fa91416d" />
+
+
 Controls:
 - Arrow keys: move 3D orbit target
