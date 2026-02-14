@@ -1,0 +1,1843 @@
+#flag -L./bin
+#flag -lraylib
+#flag -lGL
+#flag -lm
+#flag -lpthread
+#flag -ldl
+#flag -lrt
+#flag -lX11
+
+struct rAudioBuffer {
+}
+
+struct rAudioProcessor {
+}
+
+struct Vector2 {
+    x f32,
+    y f32,
+}
+
+struct Vector3 {
+    x f32,
+    y f32,
+    z f32,
+}
+
+struct Vector4 {
+    x f32,
+    y f32,
+    z f32,
+    w f32,
+}
+
+struct Matrix {
+    m0 f32,
+    m4 f32,
+    m8 f32,
+    m12 f32,
+    m1 f32,
+    m5 f32,
+    m9 f32,
+    m13 f32,
+    m2 f32,
+    m6 f32,
+    m10 f32,
+    m14 f32,
+    m3 f32,
+    m7 f32,
+    m11 f32,
+    m15 f32,
+}
+
+struct Color {
+    r u8,
+    g u8,
+    b u8,
+    a u8,
+}
+
+struct Rectangle {
+    x f32,
+    y f32,
+    width f32,
+    height f32,
+}
+
+struct Image {
+    data ptr<void>,
+    width i32,
+    height i32,
+    mipmaps i32,
+    format i32,
+}
+
+struct Texture {
+    id u32,
+    width i32,
+    height i32,
+    mipmaps i32,
+    format i32,
+}
+
+struct RenderTexture {
+    id u32,
+    texture Texture,
+    depth Texture,
+}
+
+struct NPatchInfo {
+    source Rectangle,
+    left i32,
+    top i32,
+    right i32,
+    bottom i32,
+    layout i32,
+}
+
+struct GlyphInfo {
+    value i32,
+    offsetX i32,
+    offsetY i32,
+    advanceX i32,
+    image Image,
+}
+
+struct Font {
+    baseSize i32,
+    glyphCount i32,
+    glyphPadding i32,
+    texture Texture,
+    recs ptr<Rectangle>,
+    glyphs ptr<GlyphInfo>,
+}
+
+struct Camera3D {
+    position Vector3,
+    target Vector3,
+    up Vector3,
+    fovy f32,
+    projection i32,
+}
+
+struct Camera2D {
+    offset Vector2,
+    target Vector2,
+    rotation f32,
+    zoom f32,
+}
+
+struct Mesh {
+    vertexCount i32,
+    triangleCount i32,
+    vertices ptr<f32>,
+    texcoords ptr<f32>,
+    texcoords2 ptr<f32>,
+    normals ptr<f32>,
+    tangents ptr<f32>,
+    colors ptr<u8>,
+    indices ptr<u16>,
+    animVertices ptr<f32>,
+    animNormals ptr<f32>,
+    boneIds ptr<u8>,
+    boneWeights ptr<f32>,
+    boneMatrices ptr<Matrix>,
+    boneCount i32,
+    vaoId u32,
+    vboId ptr<u32>,
+}
+
+struct Shader {
+    id u32,
+    locs ptr<i32>,
+}
+
+struct MaterialMap {
+    texture Texture,
+    color Color,
+    value f32,
+}
+
+struct Material {
+    shader Shader,
+    maps ptr<MaterialMap>,
+    params arr<f32, 4>,
+}
+
+struct Transform {
+    translation Vector3,
+    rotation Vector4,
+    scale Vector3,
+}
+
+struct BoneInfo {
+    name arr<i8, 32>,
+    parent i32,
+}
+
+struct Model {
+    transform Matrix,
+    meshCount i32,
+    materialCount i32,
+    meshes ptr<Mesh>,
+    materials ptr<Material>,
+    meshMaterial ptr<i32>,
+    boneCount i32,
+    bones ptr<BoneInfo>,
+    bindPose ptr<Transform>,
+}
+
+struct ModelAnimation {
+    boneCount i32,
+    frameCount i32,
+    bones ptr<BoneInfo>,
+    framePoses ptr<ptr<Transform>>,
+    name arr<i8, 32>,
+}
+
+struct Ray {
+    position Vector3,
+    direction Vector3,
+}
+
+struct RayCollision {
+    hit bool,
+    distance f32,
+    point Vector3,
+    normal Vector3,
+}
+
+struct BoundingBox {
+    min Vector3,
+    max Vector3,
+}
+
+struct Wave {
+    frameCount u32,
+    sampleRate u32,
+    sampleSize u32,
+    channels u32,
+    data ptr<void>,
+}
+
+struct AudioStream {
+    buffer ptr<rAudioBuffer>,
+    processor ptr<rAudioProcessor>,
+    sampleRate u32,
+    sampleSize u32,
+    channels u32,
+}
+
+struct Sound {
+    stream AudioStream,
+    frameCount u32,
+}
+
+struct Music {
+    stream AudioStream,
+    frameCount u32,
+    looping bool,
+    ctxType i32,
+    ctxData ptr<void>,
+}
+
+struct VrDeviceInfo {
+    hResolution i32,
+    vResolution i32,
+    hScreenSize f32,
+    vScreenSize f32,
+    eyeToScreenDistance f32,
+    lensSeparationDistance f32,
+    interpupillaryDistance f32,
+    lensDistortionValues arr<f32, 4>,
+    chromaAbCorrection arr<f32, 4>,
+}
+
+struct VrStereoConfig {
+    projection arr<Matrix, 2>,
+    viewOffset arr<Matrix, 2>,
+    leftLensCenter arr<f32, 2>,
+    rightLensCenter arr<f32, 2>,
+    leftScreenCenter arr<f32, 2>,
+    rightScreenCenter arr<f32, 2>,
+    scale arr<f32, 2>,
+    scaleIn arr<f32, 2>,
+}
+
+struct FilePathList {
+    capacity u32,
+    count u32,
+    paths ptr<ptr<u8>>,
+}
+
+struct AutomationEvent {
+    frame u32,
+    type u32,
+    params arr<i32, 4>,
+}
+
+struct AutomationEventList {
+    capacity u32,
+    count u32,
+    events ptr<AutomationEvent>,
+}
+
+enum bool {
+    false = 0,
+    true,
+}
+
+enum ConfigFlags {
+    FLAG_VSYNC_HINT = 0x00000040,
+    FLAG_FULLSCREEN_MODE = 0x00000002,
+    FLAG_WINDOW_RESIZABLE = 0x00000004,
+    FLAG_WINDOW_UNDECORATED = 0x00000008,
+    FLAG_WINDOW_HIDDEN = 0x00000080,
+    FLAG_WINDOW_MINIMIZED = 0x00000200,
+    FLAG_WINDOW_MAXIMIZED = 0x00000400,
+    FLAG_WINDOW_UNFOCUSED = 0x00000800,
+    FLAG_WINDOW_TOPMOST = 0x00001000,
+    FLAG_WINDOW_ALWAYS_RUN = 0x00000100,
+    FLAG_WINDOW_TRANSPARENT = 0x00000010,
+    FLAG_WINDOW_HIGHDPI = 0x00002000,
+    FLAG_WINDOW_MOUSE_PASSTHROUGH = 0x00004000,
+    FLAG_BORDERLESS_WINDOWED_MODE = 0x00008000,
+    FLAG_MSAA_4X_HINT = 0x00000020,
+    FLAG_INTERLACED_HINT = 0x00010000,
+}
+
+enum TraceLogLevel {
+    LOG_ALL = 0,
+    LOG_TRACE,
+    LOG_DEBUG,
+    LOG_INFO,
+    LOG_WARNING,
+    LOG_ERROR,
+    LOG_FATAL,
+    LOG_NONE,
+}
+
+enum KeyboardKey {
+    KEY_NULL = 0,
+    KEY_APOSTROPHE = 39,
+    KEY_COMMA = 44,
+    KEY_MINUS = 45,
+    KEY_PERIOD = 46,
+    KEY_SLASH = 47,
+    KEY_ZERO = 48,
+    KEY_ONE = 49,
+    KEY_TWO = 50,
+    KEY_THREE = 51,
+    KEY_FOUR = 52,
+    KEY_FIVE = 53,
+    KEY_SIX = 54,
+    KEY_SEVEN = 55,
+    KEY_EIGHT = 56,
+    KEY_NINE = 57,
+    KEY_SEMICOLON = 59,
+    KEY_EQUAL = 61,
+    KEY_A = 65,
+    KEY_B = 66,
+    KEY_C = 67,
+    KEY_D = 68,
+    KEY_E = 69,
+    KEY_F = 70,
+    KEY_G = 71,
+    KEY_H = 72,
+    KEY_I = 73,
+    KEY_J = 74,
+    KEY_K = 75,
+    KEY_L = 76,
+    KEY_M = 77,
+    KEY_N = 78,
+    KEY_O = 79,
+    KEY_P = 80,
+    KEY_Q = 81,
+    KEY_R = 82,
+    KEY_S = 83,
+    KEY_T = 84,
+    KEY_U = 85,
+    KEY_V = 86,
+    KEY_W = 87,
+    KEY_X = 88,
+    KEY_Y = 89,
+    KEY_Z = 90,
+    KEY_LEFT_BRACKET = 91,
+    KEY_BACKSLASH = 92,
+    KEY_RIGHT_BRACKET = 93,
+    KEY_GRAVE = 96,
+    KEY_SPACE = 32,
+    KEY_ESCAPE = 256,
+    KEY_ENTER = 257,
+    KEY_TAB = 258,
+    KEY_BACKSPACE = 259,
+    KEY_INSERT = 260,
+    KEY_DELETE = 261,
+    KEY_RIGHT = 262,
+    KEY_LEFT = 263,
+    KEY_DOWN = 264,
+    KEY_UP = 265,
+    KEY_PAGE_UP = 266,
+    KEY_PAGE_DOWN = 267,
+    KEY_HOME = 268,
+    KEY_END = 269,
+    KEY_CAPS_LOCK = 280,
+    KEY_SCROLL_LOCK = 281,
+    KEY_NUM_LOCK = 282,
+    KEY_PRINT_SCREEN = 283,
+    KEY_PAUSE = 284,
+    KEY_F1 = 290,
+    KEY_F2 = 291,
+    KEY_F3 = 292,
+    KEY_F4 = 293,
+    KEY_F5 = 294,
+    KEY_F6 = 295,
+    KEY_F7 = 296,
+    KEY_F8 = 297,
+    KEY_F9 = 298,
+    KEY_F10 = 299,
+    KEY_F11 = 300,
+    KEY_F12 = 301,
+    KEY_LEFT_SHIFT = 340,
+    KEY_LEFT_CONTROL = 341,
+    KEY_LEFT_ALT = 342,
+    KEY_LEFT_SUPER = 343,
+    KEY_RIGHT_SHIFT = 344,
+    KEY_RIGHT_CONTROL = 345,
+    KEY_RIGHT_ALT = 346,
+    KEY_RIGHT_SUPER = 347,
+    KEY_KB_MENU = 348,
+    KEY_KP_0 = 320,
+    KEY_KP_1 = 321,
+    KEY_KP_2 = 322,
+    KEY_KP_3 = 323,
+    KEY_KP_4 = 324,
+    KEY_KP_5 = 325,
+    KEY_KP_6 = 326,
+    KEY_KP_7 = 327,
+    KEY_KP_8 = 328,
+    KEY_KP_9 = 329,
+    KEY_KP_DECIMAL = 330,
+    KEY_KP_DIVIDE = 331,
+    KEY_KP_MULTIPLY = 332,
+    KEY_KP_SUBTRACT = 333,
+    KEY_KP_ADD = 334,
+    KEY_KP_ENTER = 335,
+    KEY_KP_EQUAL = 336,
+    KEY_BACK = 4,
+    KEY_MENU = 5,
+    KEY_VOLUME_UP = 24,
+    KEY_VOLUME_DOWN = 25,
+}
+
+enum MouseButton {
+    MOUSE_BUTTON_LEFT = 0,
+    MOUSE_BUTTON_RIGHT = 1,
+    MOUSE_BUTTON_MIDDLE = 2,
+    MOUSE_BUTTON_SIDE = 3,
+    MOUSE_BUTTON_EXTRA = 4,
+    MOUSE_BUTTON_FORWARD = 5,
+    MOUSE_BUTTON_BACK = 6,
+}
+
+enum MouseCursor {
+    MOUSE_CURSOR_DEFAULT = 0,
+    MOUSE_CURSOR_ARROW = 1,
+    MOUSE_CURSOR_IBEAM = 2,
+    MOUSE_CURSOR_CROSSHAIR = 3,
+    MOUSE_CURSOR_POINTING_HAND = 4,
+    MOUSE_CURSOR_RESIZE_EW = 5,
+    MOUSE_CURSOR_RESIZE_NS = 6,
+    MOUSE_CURSOR_RESIZE_NWSE = 7,
+    MOUSE_CURSOR_RESIZE_NESW = 8,
+    MOUSE_CURSOR_RESIZE_ALL = 9,
+    MOUSE_CURSOR_NOT_ALLOWED = 10,
+}
+
+enum GamepadButton {
+    GAMEPAD_BUTTON_UNKNOWN = 0,
+    GAMEPAD_BUTTON_LEFT_FACE_UP,
+    GAMEPAD_BUTTON_LEFT_FACE_RIGHT,
+    GAMEPAD_BUTTON_LEFT_FACE_DOWN,
+    GAMEPAD_BUTTON_LEFT_FACE_LEFT,
+    GAMEPAD_BUTTON_RIGHT_FACE_UP,
+    GAMEPAD_BUTTON_RIGHT_FACE_RIGHT,
+    GAMEPAD_BUTTON_RIGHT_FACE_DOWN,
+    GAMEPAD_BUTTON_RIGHT_FACE_LEFT,
+    GAMEPAD_BUTTON_LEFT_TRIGGER_1,
+    GAMEPAD_BUTTON_LEFT_TRIGGER_2,
+    GAMEPAD_BUTTON_RIGHT_TRIGGER_1,
+    GAMEPAD_BUTTON_RIGHT_TRIGGER_2,
+    GAMEPAD_BUTTON_MIDDLE_LEFT,
+    GAMEPAD_BUTTON_MIDDLE,
+    GAMEPAD_BUTTON_MIDDLE_RIGHT,
+    GAMEPAD_BUTTON_LEFT_THUMB,
+    GAMEPAD_BUTTON_RIGHT_THUMB,
+}
+
+enum GamepadAxis {
+    GAMEPAD_AXIS_LEFT_X = 0,
+    GAMEPAD_AXIS_LEFT_Y = 1,
+    GAMEPAD_AXIS_RIGHT_X = 2,
+    GAMEPAD_AXIS_RIGHT_Y = 3,
+    GAMEPAD_AXIS_LEFT_TRIGGER = 4,
+    GAMEPAD_AXIS_RIGHT_TRIGGER = 5,
+}
+
+enum MaterialMapIndex {
+    MATERIAL_MAP_ALBEDO = 0,
+    MATERIAL_MAP_METALNESS,
+    MATERIAL_MAP_NORMAL,
+    MATERIAL_MAP_ROUGHNESS,
+    MATERIAL_MAP_OCCLUSION,
+    MATERIAL_MAP_EMISSION,
+    MATERIAL_MAP_HEIGHT,
+    MATERIAL_MAP_CUBEMAP,
+    MATERIAL_MAP_IRRADIANCE,
+    MATERIAL_MAP_PREFILTER,
+    MATERIAL_MAP_BRDF,
+}
+
+enum ShaderLocationIndex {
+    SHADER_LOC_VERTEX_POSITION = 0,
+    SHADER_LOC_VERTEX_TEXCOORD01,
+    SHADER_LOC_VERTEX_TEXCOORD02,
+    SHADER_LOC_VERTEX_NORMAL,
+    SHADER_LOC_VERTEX_TANGENT,
+    SHADER_LOC_VERTEX_COLOR,
+    SHADER_LOC_MATRIX_MVP,
+    SHADER_LOC_MATRIX_VIEW,
+    SHADER_LOC_MATRIX_PROJECTION,
+    SHADER_LOC_MATRIX_MODEL,
+    SHADER_LOC_MATRIX_NORMAL,
+    SHADER_LOC_VECTOR_VIEW,
+    SHADER_LOC_COLOR_DIFFUSE,
+    SHADER_LOC_COLOR_SPECULAR,
+    SHADER_LOC_COLOR_AMBIENT,
+    SHADER_LOC_MAP_ALBEDO,
+    SHADER_LOC_MAP_METALNESS,
+    SHADER_LOC_MAP_NORMAL,
+    SHADER_LOC_MAP_ROUGHNESS,
+    SHADER_LOC_MAP_OCCLUSION,
+    SHADER_LOC_MAP_EMISSION,
+    SHADER_LOC_MAP_HEIGHT,
+    SHADER_LOC_MAP_CUBEMAP,
+    SHADER_LOC_MAP_IRRADIANCE,
+    SHADER_LOC_MAP_PREFILTER,
+    SHADER_LOC_MAP_BRDF,
+    SHADER_LOC_VERTEX_BONEIDS,
+    SHADER_LOC_VERTEX_BONEWEIGHTS,
+    SHADER_LOC_BONE_MATRICES,
+    SHADER_LOC_VERTEX_INSTANCE_TX,
+}
+
+enum ShaderUniformDataType {
+    SHADER_UNIFORM_FLOAT = 0,
+    SHADER_UNIFORM_VEC2,
+    SHADER_UNIFORM_VEC3,
+    SHADER_UNIFORM_VEC4,
+    SHADER_UNIFORM_INT,
+    SHADER_UNIFORM_IVEC2,
+    SHADER_UNIFORM_IVEC3,
+    SHADER_UNIFORM_IVEC4,
+    SHADER_UNIFORM_UINT,
+    SHADER_UNIFORM_UIVEC2,
+    SHADER_UNIFORM_UIVEC3,
+    SHADER_UNIFORM_UIVEC4,
+    SHADER_UNIFORM_SAMPLER2D,
+}
+
+enum ShaderAttributeDataType {
+    SHADER_ATTRIB_FLOAT = 0,
+    SHADER_ATTRIB_VEC2,
+    SHADER_ATTRIB_VEC3,
+    SHADER_ATTRIB_VEC4,
+}
+
+enum PixelFormat {
+    PIXELFORMAT_UNCOMPRESSED_GRAYSCALE = 1,
+    PIXELFORMAT_UNCOMPRESSED_GRAY_ALPHA,
+    PIXELFORMAT_UNCOMPRESSED_R5G6B5,
+    PIXELFORMAT_UNCOMPRESSED_R8G8B8,
+    PIXELFORMAT_UNCOMPRESSED_R5G5B5A1,
+    PIXELFORMAT_UNCOMPRESSED_R4G4B4A4,
+    PIXELFORMAT_UNCOMPRESSED_R8G8B8A8,
+    PIXELFORMAT_UNCOMPRESSED_R32,
+    PIXELFORMAT_UNCOMPRESSED_R32G32B32,
+    PIXELFORMAT_UNCOMPRESSED_R32G32B32A32,
+    PIXELFORMAT_UNCOMPRESSED_R16,
+    PIXELFORMAT_UNCOMPRESSED_R16G16B16,
+    PIXELFORMAT_UNCOMPRESSED_R16G16B16A16,
+    PIXELFORMAT_COMPRESSED_DXT1_RGB,
+    PIXELFORMAT_COMPRESSED_DXT1_RGBA,
+    PIXELFORMAT_COMPRESSED_DXT3_RGBA,
+    PIXELFORMAT_COMPRESSED_DXT5_RGBA,
+    PIXELFORMAT_COMPRESSED_ETC1_RGB,
+    PIXELFORMAT_COMPRESSED_ETC2_RGB,
+    PIXELFORMAT_COMPRESSED_ETC2_EAC_RGBA,
+    PIXELFORMAT_COMPRESSED_PVRT_RGB,
+    PIXELFORMAT_COMPRESSED_PVRT_RGBA,
+    PIXELFORMAT_COMPRESSED_ASTC_4x4_RGBA,
+    PIXELFORMAT_COMPRESSED_ASTC_8x8_RGBA,
+}
+
+enum TextureFilter {
+    TEXTURE_FILTER_POINT = 0,
+    TEXTURE_FILTER_BILINEAR,
+    TEXTURE_FILTER_TRILINEAR,
+    TEXTURE_FILTER_ANISOTROPIC_4X,
+    TEXTURE_FILTER_ANISOTROPIC_8X,
+    TEXTURE_FILTER_ANISOTROPIC_16X,
+}
+
+enum TextureWrap {
+    TEXTURE_WRAP_REPEAT = 0,
+    TEXTURE_WRAP_CLAMP,
+    TEXTURE_WRAP_MIRROR_REPEAT,
+    TEXTURE_WRAP_MIRROR_CLAMP,
+}
+
+enum CubemapLayout {
+    CUBEMAP_LAYOUT_AUTO_DETECT = 0,
+    CUBEMAP_LAYOUT_LINE_VERTICAL,
+    CUBEMAP_LAYOUT_LINE_HORIZONTAL,
+    CUBEMAP_LAYOUT_CROSS_THREE_BY_FOUR,
+    CUBEMAP_LAYOUT_CROSS_FOUR_BY_THREE,
+}
+
+enum FontType {
+    FONT_DEFAULT = 0,
+    FONT_BITMAP,
+    FONT_SDF,
+}
+
+enum BlendMode {
+    BLEND_ALPHA = 0,
+    BLEND_ADDITIVE,
+    BLEND_MULTIPLIED,
+    BLEND_ADD_COLORS,
+    BLEND_SUBTRACT_COLORS,
+    BLEND_ALPHA_PREMULTIPLY,
+    BLEND_CUSTOM,
+    BLEND_CUSTOM_SEPARATE,
+}
+
+enum Gesture {
+    GESTURE_NONE = 0,
+    GESTURE_TAP = 1,
+    GESTURE_DOUBLETAP = 2,
+    GESTURE_HOLD = 4,
+    GESTURE_DRAG = 8,
+    GESTURE_SWIPE_RIGHT = 16,
+    GESTURE_SWIPE_LEFT = 32,
+    GESTURE_SWIPE_UP = 64,
+    GESTURE_SWIPE_DOWN = 128,
+    GESTURE_PINCH_IN = 256,
+    GESTURE_PINCH_OUT = 512,
+}
+
+enum CameraMode {
+    CAMERA_CUSTOM = 0,
+    CAMERA_FREE,
+    CAMERA_ORBITAL,
+    CAMERA_FIRST_PERSON,
+    CAMERA_THIRD_PERSON,
+}
+
+enum CameraProjection {
+    CAMERA_PERSPECTIVE = 0,
+    CAMERA_ORTHOGRAPHIC,
+}
+
+enum NPatchLayout {
+    NPATCH_NINE_PATCH = 0,
+    NPATCH_THREE_PATCH_VERTICAL,
+    NPATCH_THREE_PATCH_HORIZONTAL,
+}
+
+const i32 RAYLIB_VERSION_MAJOR = 5;
+const i32 RAYLIB_VERSION_MINOR = 6;
+const i32 RAYLIB_VERSION_PATCH = 0;
+const f32 PI = 3.14159265358979323846;
+
+fun __abi_pack_Vector2(value: Vector2) >> simd<f32, 2> {
+    simd<f32, 2> tmp = {value.x, value.y};
+    return tmp;
+}
+
+fun __abi_unpack_Vector2(value: simd<f32, 2>) >> Vector2 {
+    Vector2 tmp = Vector2{x = value[0], y = value[1]};
+    return tmp;
+}
+
+fun __abi_pack_Vector4(value: Vector4) >> simd<f32, 4> {
+    simd<f32, 4> tmp = {value.x, value.y, value.z, value.w};
+    return tmp;
+}
+
+fun __abi_unpack_Vector4(value: simd<f32, 4>) >> Vector4 {
+    Vector4 tmp = Vector4{x = value[0], y = value[1], z = value[2], w = value[3]};
+    return tmp;
+}
+
+fun __abi_pack_Color(value: Color) >> u32 {
+    return (value.r as u32) |
+           ((value.g as u32) << 8) |
+           ((value.b as u32) << 16) |
+           ((value.a as u32) << 24);
+}
+
+fun __abi_unpack_Color(value: u32) >> Color {
+    Color tmp = Color{
+        r = (value & 0xFF) as u8,
+        g = ((value >> 8) & 0xFF) as u8,
+        b = ((value >> 16) & 0xFF) as u8,
+        a = ((value >> 24) & 0xFF) as u8,
+    };
+    return tmp;
+}
+
+fun __abi_pack_Rectangle(value: Rectangle) >> simd<f32, 4> {
+    simd<f32, 4> tmp = {value.x, value.y, value.width, value.height};
+    return tmp;
+}
+
+fun __abi_unpack_Rectangle(value: simd<f32, 4>) >> Rectangle {
+    Rectangle tmp = Rectangle{x = value[0], y = value[1], width = value[2], height = value[3]};
+    return tmp;
+}
+
+wrap @InitWindow(p0: i32, p1: i32, p2: ptr<u8>) >> void;
+wrap @CloseWindow() >> void;
+wrap @WindowShouldClose() >> bool;
+wrap @IsWindowReady() >> bool;
+wrap @IsWindowFullscreen() >> bool;
+wrap @IsWindowHidden() >> bool;
+wrap @IsWindowMinimized() >> bool;
+wrap @IsWindowMaximized() >> bool;
+wrap @IsWindowFocused() >> bool;
+wrap @IsWindowResized() >> bool;
+wrap @IsWindowState(p0: u32) >> bool;
+wrap @SetWindowState(p0: u32) >> void;
+wrap @ClearWindowState(p0: u32) >> void;
+wrap @ToggleFullscreen() >> void;
+wrap @ToggleBorderlessWindowed() >> void;
+wrap @MaximizeWindow() >> void;
+wrap @MinimizeWindow() >> void;
+wrap @RestoreWindow() >> void;
+wrap @SetWindowIcon(p0: Image) >> void;
+wrap @SetWindowIcons(p0: ptr<Image>, p1: i32) >> void;
+wrap @SetWindowTitle(p0: ptr<u8>) >> void;
+wrap @SetWindowPosition(p0: i32, p1: i32) >> void;
+wrap @SetWindowMonitor(p0: i32) >> void;
+wrap @SetWindowMinSize(p0: i32, p1: i32) >> void;
+wrap @SetWindowMaxSize(p0: i32, p1: i32) >> void;
+wrap @SetWindowSize(p0: i32, p1: i32) >> void;
+wrap @SetWindowOpacity(p0: f32) >> void;
+wrap @SetWindowFocused() >> void;
+wrap @GetWindowHandle() >> ptr<void>;
+wrap @GetScreenWidth() >> i32;
+wrap @GetScreenHeight() >> i32;
+wrap @GetRenderWidth() >> i32;
+wrap @GetRenderHeight() >> i32;
+wrap @GetMonitorCount() >> i32;
+wrap @GetCurrentMonitor() >> i32;
+fun @GetMonitorPosition(p0: i32) >> simd<f32, 2>;
+fun GetMonitorPosition(p0: i32) >> Vector2 {
+    return __abi_unpack_Vector2(@GetMonitorPosition(p0));
+}
+
+wrap @GetMonitorWidth(p0: i32) >> i32;
+wrap @GetMonitorHeight(p0: i32) >> i32;
+wrap @GetMonitorPhysicalWidth(p0: i32) >> i32;
+wrap @GetMonitorPhysicalHeight(p0: i32) >> i32;
+wrap @GetMonitorRefreshRate(p0: i32) >> i32;
+fun @GetWindowPosition() >> simd<f32, 2>;
+fun GetWindowPosition() >> Vector2 {
+    return __abi_unpack_Vector2(@GetWindowPosition());
+}
+
+fun @GetWindowScaleDPI() >> simd<f32, 2>;
+fun GetWindowScaleDPI() >> Vector2 {
+    return __abi_unpack_Vector2(@GetWindowScaleDPI());
+}
+
+wrap @GetMonitorName(p0: i32) >> ptr<u8>;
+wrap @SetClipboardText(p0: ptr<u8>) >> void;
+wrap @GetClipboardText() >> ptr<u8>;
+wrap @GetClipboardImage() >> Image;
+wrap @EnableEventWaiting() >> void;
+wrap @DisableEventWaiting() >> void;
+wrap @ShowCursor() >> void;
+wrap @HideCursor() >> void;
+wrap @IsCursorHidden() >> bool;
+wrap @EnableCursor() >> void;
+wrap @DisableCursor() >> void;
+wrap @IsCursorOnScreen() >> bool;
+fun @ClearBackground(p0: u32) >> void;
+fun ClearBackground(p0: Color) >> void {
+    @ClearBackground(__abi_pack_Color(p0));
+}
+
+wrap @BeginDrawing() >> void;
+wrap @EndDrawing() >> void;
+wrap @BeginMode2D(p0: Camera2D) >> void;
+wrap @EndMode2D() >> void;
+wrap @BeginMode3D(p0: Camera3D) >> void;
+wrap @EndMode3D() >> void;
+wrap @BeginTextureMode(p0: RenderTexture) >> void;
+wrap @EndTextureMode() >> void;
+wrap @BeginShaderMode(p0: Shader) >> void;
+wrap @EndShaderMode() >> void;
+wrap @BeginBlendMode(p0: i32) >> void;
+wrap @EndBlendMode() >> void;
+wrap @BeginScissorMode(p0: i32, p1: i32, p2: i32, p3: i32) >> void;
+wrap @EndScissorMode() >> void;
+wrap @BeginVrStereoMode(p0: VrStereoConfig) >> void;
+wrap @EndVrStereoMode() >> void;
+wrap @LoadVrStereoConfig(p0: VrDeviceInfo) >> VrStereoConfig;
+wrap @UnloadVrStereoConfig(p0: VrStereoConfig) >> void;
+wrap @LoadShader(p0: ptr<u8>, p1: ptr<u8>) >> Shader;
+wrap @LoadShaderFromMemory(p0: ptr<u8>, p1: ptr<u8>) >> Shader;
+wrap @IsShaderValid(p0: Shader) >> bool;
+wrap @GetShaderLocation(p0: Shader, p1: ptr<u8>) >> i32;
+wrap @GetShaderLocationAttrib(p0: Shader, p1: ptr<u8>) >> i32;
+wrap @SetShaderValue(p0: Shader, p1: i32, p2: ptr<void>, p3: i32) >> void;
+wrap @SetShaderValueV(p0: Shader, p1: i32, p2: ptr<void>, p3: i32, p4: i32) >> void;
+wrap @SetShaderValueMatrix(p0: Shader, p1: i32, p2: Matrix) >> void;
+wrap @SetShaderValueTexture(p0: Shader, p1: i32, p2: Texture) >> void;
+wrap @UnloadShader(p0: Shader) >> void;
+fun @GetScreenToWorldRay(p0: simd<f32, 2>, p1: Camera3D) >> Ray;
+
+fun @GetScreenToWorldRayEx(p0: simd<f32, 2>, p1: Camera3D, p2: i32, p3: i32) >> Ray;
+
+fun @GetWorldToScreen(p0: Vector3, p1: Camera3D) >> simd<f32, 2>;
+
+fun @GetWorldToScreenEx(p0: Vector3, p1: Camera3D, p2: i32, p3: i32) >> simd<f32, 2>;
+
+fun @GetWorldToScreen2D(p0: simd<f32, 2>, p1: Camera2D) >> simd<f32, 2>;
+
+fun @GetScreenToWorld2D(p0: simd<f32, 2>, p1: Camera2D) >> simd<f32, 2>;
+
+wrap @GetCameraMatrix(p0: Camera3D) >> Matrix;
+wrap @GetCameraMatrix2D(p0: Camera2D) >> Matrix;
+wrap @SetTargetFPS(p0: i32) >> void;
+wrap @GetFrameTime() >> f32;
+wrap @GetTime() >> f64;
+wrap @GetFPS() >> i32;
+wrap @SwapScreenBuffer() >> void;
+wrap @PollInputEvents() >> void;
+wrap @WaitTime(p0: f64) >> void;
+wrap @SetRandomSeed(p0: u32) >> void;
+wrap @GetRandomValue(p0: i32, p1: i32) >> i32;
+wrap @LoadRandomSequence(p0: u32, p1: i32, p2: i32) >> ptr<i32>;
+wrap @UnloadRandomSequence(p0: ptr<i32>) >> void;
+wrap @TakeScreenshot(p0: ptr<u8>) >> void;
+wrap @SetConfigFlags(p0: u32) >> void;
+wrap @OpenURL(p0: ptr<u8>) >> void;
+wrap @TraceLog(p0: i32, p1: ptr<u8>, __varargs: vararg<_>) >> void;
+wrap @SetTraceLogLevel(p0: i32) >> void;
+wrap @MemAlloc(p0: u32) >> ptr<void>;
+wrap @MemRealloc(p0: ptr<void>, p1: u32) >> ptr<void>;
+wrap @MemFree(p0: ptr<void>) >> void;
+wrap @SetTraceLogCallback(p0: ptr<void>) >> void;
+wrap @SetLoadFileDataCallback(p0: ptr<void>) >> void;
+wrap @SetSaveFileDataCallback(p0: ptr<void>) >> void;
+wrap @SetLoadFileTextCallback(p0: ptr<void>) >> void;
+wrap @SetSaveFileTextCallback(p0: ptr<void>) >> void;
+wrap @LoadFileData(p0: ptr<u8>, p1: ptr<i32>) >> ptr<u8>;
+wrap @UnloadFileData(p0: ptr<u8>) >> void;
+wrap @SaveFileData(p0: ptr<u8>, p1: ptr<void>, p2: i32) >> bool;
+wrap @ExportDataAsCode(p0: ptr<u8>, p1: i32, p2: ptr<u8>) >> bool;
+wrap @LoadFileText(p0: ptr<u8>) >> ptr<u8>;
+wrap @UnloadFileText(p0: ptr<u8>) >> void;
+wrap @SaveFileText(p0: ptr<u8>, p1: ptr<u8>) >> bool;
+wrap @FileRename(p0: ptr<u8>, p1: ptr<u8>) >> i32;
+wrap @FileRemove(p0: ptr<u8>) >> i32;
+wrap @FileCopy(p0: ptr<u8>, p1: ptr<u8>) >> i32;
+wrap @FileMove(p0: ptr<u8>, p1: ptr<u8>) >> i32;
+wrap @FileTextReplace(p0: ptr<u8>, p1: ptr<u8>, p2: ptr<u8>) >> i32;
+wrap @FileTextFindIndex(p0: ptr<u8>, p1: ptr<u8>) >> i32;
+wrap @FileExists(p0: ptr<u8>) >> bool;
+wrap @DirectoryExists(p0: ptr<u8>) >> bool;
+wrap @IsFileExtension(p0: ptr<u8>, p1: ptr<u8>) >> bool;
+wrap @GetFileLength(p0: ptr<u8>) >> i32;
+wrap @GetFileModTime(p0: ptr<u8>) >> i64;
+wrap @GetFileExtension(p0: ptr<u8>) >> ptr<u8>;
+wrap @GetFileName(p0: ptr<u8>) >> ptr<u8>;
+wrap @GetFileNameWithoutExt(p0: ptr<u8>) >> ptr<u8>;
+wrap @GetDirectoryPath(p0: ptr<u8>) >> ptr<u8>;
+wrap @GetPrevDirectoryPath(p0: ptr<u8>) >> ptr<u8>;
+wrap @GetWorkingDirectory() >> ptr<u8>;
+wrap @GetApplicationDirectory() >> ptr<u8>;
+wrap @MakeDirectory(p0: ptr<u8>) >> i32;
+wrap @ChangeDirectory(p0: ptr<u8>) >> bool;
+wrap @IsPathFile(p0: ptr<u8>) >> bool;
+wrap @IsFileNameValid(p0: ptr<u8>) >> bool;
+wrap @LoadDirectoryFiles(p0: ptr<u8>) >> FilePathList;
+wrap @LoadDirectoryFilesEx(p0: ptr<u8>, p1: ptr<u8>, p2: bool) >> FilePathList;
+wrap @UnloadDirectoryFiles(p0: FilePathList) >> void;
+wrap @IsFileDropped() >> bool;
+wrap @LoadDroppedFiles() >> FilePathList;
+wrap @UnloadDroppedFiles(p0: FilePathList) >> void;
+wrap @CompressData(p0: ptr<u8>, p1: i32, p2: ptr<i32>) >> ptr<u8>;
+wrap @DecompressData(p0: ptr<u8>, p1: i32, p2: ptr<i32>) >> ptr<u8>;
+wrap @EncodeDataBase64(p0: ptr<u8>, p1: i32, p2: ptr<i32>) >> ptr<u8>;
+wrap @DecodeDataBase64(p0: ptr<u8>, p1: ptr<i32>) >> ptr<u8>;
+wrap @ComputeCRC32(p0: ptr<u8>, p1: i32) >> u32;
+wrap @ComputeMD5(p0: ptr<u8>, p1: i32) >> ptr<u32>;
+wrap @ComputeSHA1(p0: ptr<u8>, p1: i32) >> ptr<u32>;
+wrap @LoadAutomationEventList(p0: ptr<u8>) >> AutomationEventList;
+wrap @UnloadAutomationEventList(p0: AutomationEventList) >> void;
+wrap @ExportAutomationEventList(p0: AutomationEventList, p1: ptr<u8>) >> bool;
+wrap @SetAutomationEventList(p0: ptr<AutomationEventList>) >> void;
+wrap @SetAutomationEventBaseFrame(p0: i32) >> void;
+wrap @StartAutomationEventRecording() >> void;
+wrap @StopAutomationEventRecording() >> void;
+wrap @PlayAutomationEvent(p0: AutomationEvent) >> void;
+wrap @IsKeyPressed(p0: i32) >> bool;
+wrap @IsKeyPressedRepeat(p0: i32) >> bool;
+wrap @IsKeyDown(p0: i32) >> bool;
+wrap @IsKeyReleased(p0: i32) >> bool;
+wrap @IsKeyUp(p0: i32) >> bool;
+wrap @GetKeyPressed() >> i32;
+wrap @GetCharPressed() >> i32;
+wrap @GetKeyName(p0: i32) >> ptr<u8>;
+wrap @SetExitKey(p0: i32) >> void;
+wrap @IsGamepadAvailable(p0: i32) >> bool;
+wrap @GetGamepadName(p0: i32) >> ptr<u8>;
+wrap @IsGamepadButtonPressed(p0: i32, p1: i32) >> bool;
+wrap @IsGamepadButtonDown(p0: i32, p1: i32) >> bool;
+wrap @IsGamepadButtonReleased(p0: i32, p1: i32) >> bool;
+wrap @IsGamepadButtonUp(p0: i32, p1: i32) >> bool;
+wrap @GetGamepadButtonPressed() >> i32;
+wrap @GetGamepadAxisCount(p0: i32) >> i32;
+wrap @GetGamepadAxisMovement(p0: i32, p1: i32) >> f32;
+wrap @SetGamepadMappings(p0: ptr<u8>) >> i32;
+wrap @SetGamepadVibration(p0: i32, p1: f32, p2: f32, p3: f32) >> void;
+wrap @IsMouseButtonPressed(p0: i32) >> bool;
+wrap @IsMouseButtonDown(p0: i32) >> bool;
+wrap @IsMouseButtonReleased(p0: i32) >> bool;
+wrap @IsMouseButtonUp(p0: i32) >> bool;
+wrap @GetMouseX() >> i32;
+wrap @GetMouseY() >> i32;
+fun @GetMousePosition() >> simd<f32, 2>;
+fun GetMousePosition() >> Vector2 {
+    return __abi_unpack_Vector2(@GetMousePosition());
+}
+
+fun @GetMouseDelta() >> simd<f32, 2>;
+fun GetMouseDelta() >> Vector2 {
+    return __abi_unpack_Vector2(@GetMouseDelta());
+}
+
+wrap @SetMousePosition(p0: i32, p1: i32) >> void;
+wrap @SetMouseOffset(p0: i32, p1: i32) >> void;
+wrap @SetMouseScale(p0: f32, p1: f32) >> void;
+wrap @GetMouseWheelMove() >> f32;
+fun @GetMouseWheelMoveV() >> simd<f32, 2>;
+fun GetMouseWheelMoveV() >> Vector2 {
+    return __abi_unpack_Vector2(@GetMouseWheelMoveV());
+}
+
+wrap @SetMouseCursor(p0: i32) >> void;
+wrap @GetTouchX() >> i32;
+wrap @GetTouchY() >> i32;
+fun @GetTouchPosition(p0: i32) >> simd<f32, 2>;
+fun GetTouchPosition(p0: i32) >> Vector2 {
+    return __abi_unpack_Vector2(@GetTouchPosition(p0));
+}
+
+wrap @GetTouchPointId(p0: i32) >> i32;
+wrap @GetTouchPointCount() >> i32;
+wrap @SetGesturesEnabled(p0: u32) >> void;
+wrap @IsGestureDetected(p0: u32) >> bool;
+wrap @GetGestureDetected() >> i32;
+wrap @GetGestureHoldDuration() >> f32;
+fun @GetGestureDragVector() >> simd<f32, 2>;
+fun GetGestureDragVector() >> Vector2 {
+    return __abi_unpack_Vector2(@GetGestureDragVector());
+}
+
+wrap @GetGestureDragAngle() >> f32;
+fun @GetGesturePinchVector() >> simd<f32, 2>;
+fun GetGesturePinchVector() >> Vector2 {
+    return __abi_unpack_Vector2(@GetGesturePinchVector());
+}
+
+wrap @GetGesturePinchAngle() >> f32;
+wrap @UpdateCamera(p0: ptr<Camera3D>, p1: i32) >> void;
+wrap @UpdateCameraPro(p0: ptr<Camera3D>, p1: Vector3, p2: Vector3, p3: f32) >> void;
+fun @SetShapesTexture(p0: Texture, p1: simd<f32, 4>) >> void;
+
+wrap @GetShapesTexture() >> Texture;
+fun @GetShapesTextureRectangle() >> simd<f32, 4>;
+fun GetShapesTextureRectangle() >> Rectangle {
+    return __abi_unpack_Rectangle(@GetShapesTextureRectangle());
+}
+
+fun @DrawPixel(p0: i32, p1: i32, p2: u32) >> void;
+fun DrawPixel(p0: i32, p1: i32, p2: Color) >> void {
+    @DrawPixel(p0, p1, __abi_pack_Color(p2));
+}
+
+fun @DrawPixelV(p0: simd<f32, 2>, p1: u32) >> void;
+fun DrawPixelV(p0: Vector2, p1: Color) >> void {
+    @DrawPixelV(__abi_pack_Vector2(p0), __abi_pack_Color(p1));
+}
+
+fun @DrawLine(p0: i32, p1: i32, p2: i32, p3: i32, p4: u32) >> void;
+fun DrawLine(p0: i32, p1: i32, p2: i32, p3: i32, p4: Color) >> void {
+    @DrawLine(p0, p1, p2, p3, __abi_pack_Color(p4));
+}
+
+fun @DrawLineV(p0: simd<f32, 2>, p1: simd<f32, 2>, p2: u32) >> void;
+fun DrawLineV(p0: Vector2, p1: Vector2, p2: Color) >> void {
+    @DrawLineV(__abi_pack_Vector2(p0), __abi_pack_Vector2(p1), __abi_pack_Color(p2));
+}
+
+fun @DrawLineEx(p0: simd<f32, 2>, p1: simd<f32, 2>, p2: f32, p3: u32) >> void;
+fun DrawLineEx(p0: Vector2, p1: Vector2, p2: f32, p3: Color) >> void {
+    @DrawLineEx(__abi_pack_Vector2(p0), __abi_pack_Vector2(p1), p2, __abi_pack_Color(p3));
+}
+
+fun @DrawLineStrip(p0: ptr<Vector2>, p1: i32, p2: u32) >> void;
+fun DrawLineStrip(p0: ptr<Vector2>, p1: i32, p2: Color) >> void {
+    @DrawLineStrip(p0, p1, __abi_pack_Color(p2));
+}
+
+fun @DrawLineBezier(p0: simd<f32, 2>, p1: simd<f32, 2>, p2: f32, p3: u32) >> void;
+fun DrawLineBezier(p0: Vector2, p1: Vector2, p2: f32, p3: Color) >> void {
+    @DrawLineBezier(__abi_pack_Vector2(p0), __abi_pack_Vector2(p1), p2, __abi_pack_Color(p3));
+}
+
+fun @DrawCircle(p0: i32, p1: i32, p2: f32, p3: u32) >> void;
+fun DrawCircle(p0: i32, p1: i32, p2: f32, p3: Color) >> void {
+    @DrawCircle(p0, p1, p2, __abi_pack_Color(p3));
+}
+
+fun @DrawCircleSector(p0: simd<f32, 2>, p1: f32, p2: f32, p3: f32, p4: i32, p5: u32) >> void;
+fun DrawCircleSector(p0: Vector2, p1: f32, p2: f32, p3: f32, p4: i32, p5: Color) >> void {
+    @DrawCircleSector(__abi_pack_Vector2(p0), p1, p2, p3, p4, __abi_pack_Color(p5));
+}
+
+fun @DrawCircleSectorLines(p0: simd<f32, 2>, p1: f32, p2: f32, p3: f32, p4: i32, p5: u32) >> void;
+fun DrawCircleSectorLines(p0: Vector2, p1: f32, p2: f32, p3: f32, p4: i32, p5: Color) >> void {
+    @DrawCircleSectorLines(__abi_pack_Vector2(p0), p1, p2, p3, p4, __abi_pack_Color(p5));
+}
+
+fun @DrawCircleGradient(p0: i32, p1: i32, p2: f32, p3: u32, p4: u32) >> void;
+fun DrawCircleGradient(p0: i32, p1: i32, p2: f32, p3: Color, p4: Color) >> void {
+    @DrawCircleGradient(p0, p1, p2, __abi_pack_Color(p3), __abi_pack_Color(p4));
+}
+
+fun @DrawCircleV(p0: simd<f32, 2>, p1: f32, p2: u32) >> void;
+fun DrawCircleV(p0: Vector2, p1: f32, p2: Color) >> void {
+    @DrawCircleV(__abi_pack_Vector2(p0), p1, __abi_pack_Color(p2));
+}
+
+fun @DrawCircleLines(p0: i32, p1: i32, p2: f32, p3: u32) >> void;
+fun DrawCircleLines(p0: i32, p1: i32, p2: f32, p3: Color) >> void {
+    @DrawCircleLines(p0, p1, p2, __abi_pack_Color(p3));
+}
+
+fun @DrawCircleLinesV(p0: simd<f32, 2>, p1: f32, p2: u32) >> void;
+fun DrawCircleLinesV(p0: Vector2, p1: f32, p2: Color) >> void {
+    @DrawCircleLinesV(__abi_pack_Vector2(p0), p1, __abi_pack_Color(p2));
+}
+
+fun @DrawEllipse(p0: i32, p1: i32, p2: f32, p3: f32, p4: u32) >> void;
+fun DrawEllipse(p0: i32, p1: i32, p2: f32, p3: f32, p4: Color) >> void {
+    @DrawEllipse(p0, p1, p2, p3, __abi_pack_Color(p4));
+}
+
+fun @DrawEllipseV(p0: simd<f32, 2>, p1: f32, p2: f32, p3: u32) >> void;
+fun DrawEllipseV(p0: Vector2, p1: f32, p2: f32, p3: Color) >> void {
+    @DrawEllipseV(__abi_pack_Vector2(p0), p1, p2, __abi_pack_Color(p3));
+}
+
+fun @DrawEllipseLines(p0: i32, p1: i32, p2: f32, p3: f32, p4: u32) >> void;
+fun DrawEllipseLines(p0: i32, p1: i32, p2: f32, p3: f32, p4: Color) >> void {
+    @DrawEllipseLines(p0, p1, p2, p3, __abi_pack_Color(p4));
+}
+
+fun @DrawEllipseLinesV(p0: simd<f32, 2>, p1: f32, p2: f32, p3: u32) >> void;
+fun DrawEllipseLinesV(p0: Vector2, p1: f32, p2: f32, p3: Color) >> void {
+    @DrawEllipseLinesV(__abi_pack_Vector2(p0), p1, p2, __abi_pack_Color(p3));
+}
+
+fun @DrawRing(p0: simd<f32, 2>, p1: f32, p2: f32, p3: f32, p4: f32, p5: i32, p6: u32) >> void;
+fun DrawRing(p0: Vector2, p1: f32, p2: f32, p3: f32, p4: f32, p5: i32, p6: Color) >> void {
+    @DrawRing(__abi_pack_Vector2(p0), p1, p2, p3, p4, p5, __abi_pack_Color(p6));
+}
+
+fun @DrawRingLines(p0: simd<f32, 2>, p1: f32, p2: f32, p3: f32, p4: f32, p5: i32, p6: u32) >> void;
+fun DrawRingLines(p0: Vector2, p1: f32, p2: f32, p3: f32, p4: f32, p5: i32, p6: Color) >> void {
+    @DrawRingLines(__abi_pack_Vector2(p0), p1, p2, p3, p4, p5, __abi_pack_Color(p6));
+}
+
+fun @DrawRectangle(p0: i32, p1: i32, p2: i32, p3: i32, p4: u32) >> void;
+fun DrawRectangle(p0: i32, p1: i32, p2: i32, p3: i32, p4: Color) >> void {
+    @DrawRectangle(p0, p1, p2, p3, __abi_pack_Color(p4));
+}
+
+fun @DrawRectangleV(p0: simd<f32, 2>, p1: simd<f32, 2>, p2: u32) >> void;
+fun DrawRectangleV(p0: Vector2, p1: Vector2, p2: Color) >> void {
+    @DrawRectangleV(__abi_pack_Vector2(p0), __abi_pack_Vector2(p1), __abi_pack_Color(p2));
+}
+
+fun @DrawRectangleRec(p0: simd<f32, 4>, p1: u32) >> void;
+fun DrawRectangleRec(p0: Rectangle, p1: Color) >> void {
+    @DrawRectangleRec(__abi_pack_Rectangle(p0), __abi_pack_Color(p1));
+}
+
+fun @DrawRectanglePro(p0: simd<f32, 4>, p1: simd<f32, 2>, p2: f32, p3: u32) >> void;
+fun DrawRectanglePro(p0: Rectangle, p1: Vector2, p2: f32, p3: Color) >> void {
+    @DrawRectanglePro(__abi_pack_Rectangle(p0), __abi_pack_Vector2(p1), p2, __abi_pack_Color(p3));
+}
+
+fun @DrawRectangleGradientV(p0: i32, p1: i32, p2: i32, p3: i32, p4: u32, p5: u32) >> void;
+fun DrawRectangleGradientV(p0: i32, p1: i32, p2: i32, p3: i32, p4: Color, p5: Color) >> void {
+    @DrawRectangleGradientV(p0, p1, p2, p3, __abi_pack_Color(p4), __abi_pack_Color(p5));
+}
+
+fun @DrawRectangleGradientH(p0: i32, p1: i32, p2: i32, p3: i32, p4: u32, p5: u32) >> void;
+fun DrawRectangleGradientH(p0: i32, p1: i32, p2: i32, p3: i32, p4: Color, p5: Color) >> void {
+    @DrawRectangleGradientH(p0, p1, p2, p3, __abi_pack_Color(p4), __abi_pack_Color(p5));
+}
+
+fun @DrawRectangleGradientEx(p0: simd<f32, 4>, p1: u32, p2: u32, p3: u32, p4: u32) >> void;
+fun DrawRectangleGradientEx(p0: Rectangle, p1: Color, p2: Color, p3: Color, p4: Color) >> void {
+    @DrawRectangleGradientEx(__abi_pack_Rectangle(p0), __abi_pack_Color(p1), __abi_pack_Color(p2), __abi_pack_Color(p3), __abi_pack_Color(p4));
+}
+
+fun @DrawRectangleLines(p0: i32, p1: i32, p2: i32, p3: i32, p4: u32) >> void;
+fun DrawRectangleLines(p0: i32, p1: i32, p2: i32, p3: i32, p4: Color) >> void {
+    @DrawRectangleLines(p0, p1, p2, p3, __abi_pack_Color(p4));
+}
+
+fun @DrawRectangleLinesEx(p0: simd<f32, 4>, p1: f32, p2: u32) >> void;
+fun DrawRectangleLinesEx(p0: Rectangle, p1: f32, p2: Color) >> void {
+    @DrawRectangleLinesEx(__abi_pack_Rectangle(p0), p1, __abi_pack_Color(p2));
+}
+
+fun @DrawRectangleRounded(p0: simd<f32, 4>, p1: f32, p2: i32, p3: u32) >> void;
+fun DrawRectangleRounded(p0: Rectangle, p1: f32, p2: i32, p3: Color) >> void {
+    @DrawRectangleRounded(__abi_pack_Rectangle(p0), p1, p2, __abi_pack_Color(p3));
+}
+
+fun @DrawRectangleRoundedLines(p0: simd<f32, 4>, p1: f32, p2: i32, p3: u32) >> void;
+fun DrawRectangleRoundedLines(p0: Rectangle, p1: f32, p2: i32, p3: Color) >> void {
+    @DrawRectangleRoundedLines(__abi_pack_Rectangle(p0), p1, p2, __abi_pack_Color(p3));
+}
+
+fun @DrawRectangleRoundedLinesEx(p0: simd<f32, 4>, p1: f32, p2: i32, p3: f32, p4: u32) >> void;
+fun DrawRectangleRoundedLinesEx(p0: Rectangle, p1: f32, p2: i32, p3: f32, p4: Color) >> void {
+    @DrawRectangleRoundedLinesEx(__abi_pack_Rectangle(p0), p1, p2, p3, __abi_pack_Color(p4));
+}
+
+fun @DrawTriangle(p0: simd<f32, 2>, p1: simd<f32, 2>, p2: simd<f32, 2>, p3: u32) >> void;
+fun DrawTriangle(p0: Vector2, p1: Vector2, p2: Vector2, p3: Color) >> void {
+    @DrawTriangle(__abi_pack_Vector2(p0), __abi_pack_Vector2(p1), __abi_pack_Vector2(p2), __abi_pack_Color(p3));
+}
+
+fun @DrawTriangleLines(p0: simd<f32, 2>, p1: simd<f32, 2>, p2: simd<f32, 2>, p3: u32) >> void;
+fun DrawTriangleLines(p0: Vector2, p1: Vector2, p2: Vector2, p3: Color) >> void {
+    @DrawTriangleLines(__abi_pack_Vector2(p0), __abi_pack_Vector2(p1), __abi_pack_Vector2(p2), __abi_pack_Color(p3));
+}
+
+fun @DrawTriangleFan(p0: ptr<Vector2>, p1: i32, p2: u32) >> void;
+fun DrawTriangleFan(p0: ptr<Vector2>, p1: i32, p2: Color) >> void {
+    @DrawTriangleFan(p0, p1, __abi_pack_Color(p2));
+}
+
+fun @DrawTriangleStrip(p0: ptr<Vector2>, p1: i32, p2: u32) >> void;
+fun DrawTriangleStrip(p0: ptr<Vector2>, p1: i32, p2: Color) >> void {
+    @DrawTriangleStrip(p0, p1, __abi_pack_Color(p2));
+}
+
+fun @DrawPoly(p0: simd<f32, 2>, p1: i32, p2: f32, p3: f32, p4: u32) >> void;
+fun DrawPoly(p0: Vector2, p1: i32, p2: f32, p3: f32, p4: Color) >> void {
+    @DrawPoly(__abi_pack_Vector2(p0), p1, p2, p3, __abi_pack_Color(p4));
+}
+
+fun @DrawPolyLines(p0: simd<f32, 2>, p1: i32, p2: f32, p3: f32, p4: u32) >> void;
+fun DrawPolyLines(p0: Vector2, p1: i32, p2: f32, p3: f32, p4: Color) >> void {
+    @DrawPolyLines(__abi_pack_Vector2(p0), p1, p2, p3, __abi_pack_Color(p4));
+}
+
+fun @DrawPolyLinesEx(p0: simd<f32, 2>, p1: i32, p2: f32, p3: f32, p4: f32, p5: u32) >> void;
+fun DrawPolyLinesEx(p0: Vector2, p1: i32, p2: f32, p3: f32, p4: f32, p5: Color) >> void {
+    @DrawPolyLinesEx(__abi_pack_Vector2(p0), p1, p2, p3, p4, __abi_pack_Color(p5));
+}
+
+fun @DrawSplineLinear(p0: ptr<Vector2>, p1: i32, p2: f32, p3: u32) >> void;
+fun DrawSplineLinear(p0: ptr<Vector2>, p1: i32, p2: f32, p3: Color) >> void {
+    @DrawSplineLinear(p0, p1, p2, __abi_pack_Color(p3));
+}
+
+fun @DrawSplineBasis(p0: ptr<Vector2>, p1: i32, p2: f32, p3: u32) >> void;
+fun DrawSplineBasis(p0: ptr<Vector2>, p1: i32, p2: f32, p3: Color) >> void {
+    @DrawSplineBasis(p0, p1, p2, __abi_pack_Color(p3));
+}
+
+fun @DrawSplineCatmullRom(p0: ptr<Vector2>, p1: i32, p2: f32, p3: u32) >> void;
+fun DrawSplineCatmullRom(p0: ptr<Vector2>, p1: i32, p2: f32, p3: Color) >> void {
+    @DrawSplineCatmullRom(p0, p1, p2, __abi_pack_Color(p3));
+}
+
+fun @DrawSplineBezierQuadratic(p0: ptr<Vector2>, p1: i32, p2: f32, p3: u32) >> void;
+fun DrawSplineBezierQuadratic(p0: ptr<Vector2>, p1: i32, p2: f32, p3: Color) >> void {
+    @DrawSplineBezierQuadratic(p0, p1, p2, __abi_pack_Color(p3));
+}
+
+fun @DrawSplineBezierCubic(p0: ptr<Vector2>, p1: i32, p2: f32, p3: u32) >> void;
+fun DrawSplineBezierCubic(p0: ptr<Vector2>, p1: i32, p2: f32, p3: Color) >> void {
+    @DrawSplineBezierCubic(p0, p1, p2, __abi_pack_Color(p3));
+}
+
+fun @DrawSplineSegmentLinear(p0: simd<f32, 2>, p1: simd<f32, 2>, p2: f32, p3: u32) >> void;
+fun DrawSplineSegmentLinear(p0: Vector2, p1: Vector2, p2: f32, p3: Color) >> void {
+    @DrawSplineSegmentLinear(__abi_pack_Vector2(p0), __abi_pack_Vector2(p1), p2, __abi_pack_Color(p3));
+}
+
+fun @DrawSplineSegmentBasis(p0: simd<f32, 2>, p1: simd<f32, 2>, p2: simd<f32, 2>, p3: simd<f32, 2>, p4: f32, p5: u32) >> void;
+fun DrawSplineSegmentBasis(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2, p4: f32, p5: Color) >> void {
+    @DrawSplineSegmentBasis(__abi_pack_Vector2(p0), __abi_pack_Vector2(p1), __abi_pack_Vector2(p2), __abi_pack_Vector2(p3), p4, __abi_pack_Color(p5));
+}
+
+fun @DrawSplineSegmentCatmullRom(p0: simd<f32, 2>, p1: simd<f32, 2>, p2: simd<f32, 2>, p3: simd<f32, 2>, p4: f32, p5: u32) >> void;
+fun DrawSplineSegmentCatmullRom(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2, p4: f32, p5: Color) >> void {
+    @DrawSplineSegmentCatmullRom(__abi_pack_Vector2(p0), __abi_pack_Vector2(p1), __abi_pack_Vector2(p2), __abi_pack_Vector2(p3), p4, __abi_pack_Color(p5));
+}
+
+fun @DrawSplineSegmentBezierQuadratic(p0: simd<f32, 2>, p1: simd<f32, 2>, p2: simd<f32, 2>, p3: f32, p4: u32) >> void;
+fun DrawSplineSegmentBezierQuadratic(p0: Vector2, p1: Vector2, p2: Vector2, p3: f32, p4: Color) >> void {
+    @DrawSplineSegmentBezierQuadratic(__abi_pack_Vector2(p0), __abi_pack_Vector2(p1), __abi_pack_Vector2(p2), p3, __abi_pack_Color(p4));
+}
+
+fun @DrawSplineSegmentBezierCubic(p0: simd<f32, 2>, p1: simd<f32, 2>, p2: simd<f32, 2>, p3: simd<f32, 2>, p4: f32, p5: u32) >> void;
+fun DrawSplineSegmentBezierCubic(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2, p4: f32, p5: Color) >> void {
+    @DrawSplineSegmentBezierCubic(__abi_pack_Vector2(p0), __abi_pack_Vector2(p1), __abi_pack_Vector2(p2), __abi_pack_Vector2(p3), p4, __abi_pack_Color(p5));
+}
+
+fun @GetSplinePointLinear(p0: simd<f32, 2>, p1: simd<f32, 2>, p2: f32) >> simd<f32, 2>;
+fun GetSplinePointLinear(p0: Vector2, p1: Vector2, p2: f32) >> Vector2 {
+    return __abi_unpack_Vector2(@GetSplinePointLinear(__abi_pack_Vector2(p0), __abi_pack_Vector2(p1), p2));
+}
+
+fun @GetSplinePointBasis(p0: simd<f32, 2>, p1: simd<f32, 2>, p2: simd<f32, 2>, p3: simd<f32, 2>, p4: f32) >> simd<f32, 2>;
+fun GetSplinePointBasis(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2, p4: f32) >> Vector2 {
+    return __abi_unpack_Vector2(@GetSplinePointBasis(__abi_pack_Vector2(p0), __abi_pack_Vector2(p1), __abi_pack_Vector2(p2), __abi_pack_Vector2(p3), p4));
+}
+
+fun @GetSplinePointCatmullRom(p0: simd<f32, 2>, p1: simd<f32, 2>, p2: simd<f32, 2>, p3: simd<f32, 2>, p4: f32) >> simd<f32, 2>;
+fun GetSplinePointCatmullRom(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2, p4: f32) >> Vector2 {
+    return __abi_unpack_Vector2(@GetSplinePointCatmullRom(__abi_pack_Vector2(p0), __abi_pack_Vector2(p1), __abi_pack_Vector2(p2), __abi_pack_Vector2(p3), p4));
+}
+
+fun @GetSplinePointBezierQuad(p0: simd<f32, 2>, p1: simd<f32, 2>, p2: simd<f32, 2>, p3: f32) >> simd<f32, 2>;
+fun GetSplinePointBezierQuad(p0: Vector2, p1: Vector2, p2: Vector2, p3: f32) >> Vector2 {
+    return __abi_unpack_Vector2(@GetSplinePointBezierQuad(__abi_pack_Vector2(p0), __abi_pack_Vector2(p1), __abi_pack_Vector2(p2), p3));
+}
+
+fun @GetSplinePointBezierCubic(p0: simd<f32, 2>, p1: simd<f32, 2>, p2: simd<f32, 2>, p3: simd<f32, 2>, p4: f32) >> simd<f32, 2>;
+fun GetSplinePointBezierCubic(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2, p4: f32) >> Vector2 {
+    return __abi_unpack_Vector2(@GetSplinePointBezierCubic(__abi_pack_Vector2(p0), __abi_pack_Vector2(p1), __abi_pack_Vector2(p2), __abi_pack_Vector2(p3), p4));
+}
+
+fun @CheckCollisionRecs(p0: simd<f32, 4>, p1: simd<f32, 4>) >> bool;
+fun CheckCollisionRecs(p0: Rectangle, p1: Rectangle) >> bool {
+    return @CheckCollisionRecs(__abi_pack_Rectangle(p0), __abi_pack_Rectangle(p1));
+}
+
+fun @CheckCollisionCircles(p0: simd<f32, 2>, p1: f32, p2: simd<f32, 2>, p3: f32) >> bool;
+fun CheckCollisionCircles(p0: Vector2, p1: f32, p2: Vector2, p3: f32) >> bool {
+    return @CheckCollisionCircles(__abi_pack_Vector2(p0), p1, __abi_pack_Vector2(p2), p3);
+}
+
+fun @CheckCollisionCircleRec(p0: simd<f32, 2>, p1: f32, p2: simd<f32, 4>) >> bool;
+fun CheckCollisionCircleRec(p0: Vector2, p1: f32, p2: Rectangle) >> bool {
+    return @CheckCollisionCircleRec(__abi_pack_Vector2(p0), p1, __abi_pack_Rectangle(p2));
+}
+
+fun @CheckCollisionCircleLine(p0: simd<f32, 2>, p1: f32, p2: simd<f32, 2>, p3: simd<f32, 2>) >> bool;
+fun CheckCollisionCircleLine(p0: Vector2, p1: f32, p2: Vector2, p3: Vector2) >> bool {
+    return @CheckCollisionCircleLine(__abi_pack_Vector2(p0), p1, __abi_pack_Vector2(p2), __abi_pack_Vector2(p3));
+}
+
+fun @CheckCollisionPointRec(p0: simd<f32, 2>, p1: simd<f32, 4>) >> bool;
+fun CheckCollisionPointRec(p0: Vector2, p1: Rectangle) >> bool {
+    return @CheckCollisionPointRec(__abi_pack_Vector2(p0), __abi_pack_Rectangle(p1));
+}
+
+fun @CheckCollisionPointCircle(p0: simd<f32, 2>, p1: simd<f32, 2>, p2: f32) >> bool;
+fun CheckCollisionPointCircle(p0: Vector2, p1: Vector2, p2: f32) >> bool {
+    return @CheckCollisionPointCircle(__abi_pack_Vector2(p0), __abi_pack_Vector2(p1), p2);
+}
+
+fun @CheckCollisionPointTriangle(p0: simd<f32, 2>, p1: simd<f32, 2>, p2: simd<f32, 2>, p3: simd<f32, 2>) >> bool;
+fun CheckCollisionPointTriangle(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2) >> bool {
+    return @CheckCollisionPointTriangle(__abi_pack_Vector2(p0), __abi_pack_Vector2(p1), __abi_pack_Vector2(p2), __abi_pack_Vector2(p3));
+}
+
+fun @CheckCollisionPointLine(p0: simd<f32, 2>, p1: simd<f32, 2>, p2: simd<f32, 2>, p3: i32) >> bool;
+fun CheckCollisionPointLine(p0: Vector2, p1: Vector2, p2: Vector2, p3: i32) >> bool {
+    return @CheckCollisionPointLine(__abi_pack_Vector2(p0), __abi_pack_Vector2(p1), __abi_pack_Vector2(p2), p3);
+}
+
+fun @CheckCollisionPointPoly(p0: simd<f32, 2>, p1: ptr<Vector2>, p2: i32) >> bool;
+fun CheckCollisionPointPoly(p0: Vector2, p1: ptr<Vector2>, p2: i32) >> bool {
+    return @CheckCollisionPointPoly(__abi_pack_Vector2(p0), p1, p2);
+}
+
+fun @CheckCollisionLines(p0: simd<f32, 2>, p1: simd<f32, 2>, p2: simd<f32, 2>, p3: simd<f32, 2>, p4: ptr<Vector2>) >> bool;
+fun CheckCollisionLines(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2, p4: ptr<Vector2>) >> bool {
+    return @CheckCollisionLines(__abi_pack_Vector2(p0), __abi_pack_Vector2(p1), __abi_pack_Vector2(p2), __abi_pack_Vector2(p3), p4);
+}
+
+fun @GetCollisionRec(p0: simd<f32, 4>, p1: simd<f32, 4>) >> simd<f32, 4>;
+fun GetCollisionRec(p0: Rectangle, p1: Rectangle) >> Rectangle {
+    return __abi_unpack_Rectangle(@GetCollisionRec(__abi_pack_Rectangle(p0), __abi_pack_Rectangle(p1)));
+}
+
+wrap @LoadImage(p0: ptr<u8>) >> Image;
+wrap @LoadImageRaw(p0: ptr<u8>, p1: i32, p2: i32, p3: i32, p4: i32) >> Image;
+wrap @LoadImageAnim(p0: ptr<u8>, p1: ptr<i32>) >> Image;
+wrap @LoadImageAnimFromMemory(p0: ptr<u8>, p1: ptr<u8>, p2: i32, p3: ptr<i32>) >> Image;
+wrap @LoadImageFromMemory(p0: ptr<u8>, p1: ptr<u8>, p2: i32) >> Image;
+wrap @LoadImageFromTexture(p0: Texture) >> Image;
+wrap @LoadImageFromScreen() >> Image;
+wrap @IsImageValid(p0: Image) >> bool;
+wrap @UnloadImage(p0: Image) >> void;
+wrap @ExportImage(p0: Image, p1: ptr<u8>) >> bool;
+wrap @ExportImageToMemory(p0: Image, p1: ptr<u8>, p2: ptr<i32>) >> ptr<u8>;
+wrap @ExportImageAsCode(p0: Image, p1: ptr<u8>) >> bool;
+fun @GenImageColor(p0: i32, p1: i32, p2: u32) >> Image;
+
+fun @GenImageGradientLinear(p0: i32, p1: i32, p2: i32, p3: u32, p4: u32) >> Image;
+
+fun @GenImageGradientRadial(p0: i32, p1: i32, p2: f32, p3: u32, p4: u32) >> Image;
+
+fun @GenImageGradientSquare(p0: i32, p1: i32, p2: f32, p3: u32, p4: u32) >> Image;
+
+fun @GenImageChecked(p0: i32, p1: i32, p2: i32, p3: i32, p4: u32, p5: u32) >> Image;
+
+wrap @GenImageWhiteNoise(p0: i32, p1: i32, p2: f32) >> Image;
+wrap @GenImagePerlinNoise(p0: i32, p1: i32, p2: i32, p3: i32, p4: f32) >> Image;
+wrap @GenImageCellular(p0: i32, p1: i32, p2: i32) >> Image;
+wrap @GenImageText(p0: i32, p1: i32, p2: ptr<u8>) >> Image;
+wrap @ImageCopy(p0: Image) >> Image;
+fun @ImageFromImage(p0: Image, p1: simd<f32, 4>) >> Image;
+
+wrap @ImageFromChannel(p0: Image, p1: i32) >> Image;
+fun @ImageText(p0: ptr<u8>, p1: i32, p2: u32) >> Image;
+
+fun @ImageTextEx(p0: Font, p1: ptr<u8>, p2: f32, p3: f32, p4: u32) >> Image;
+
+wrap @ImageFormat(p0: ptr<Image>, p1: i32) >> void;
+fun @ImageToPOT(p0: ptr<Image>, p1: u32) >> void;
+fun ImageToPOT(p0: ptr<Image>, p1: Color) >> void {
+    @ImageToPOT(p0, __abi_pack_Color(p1));
+}
+
+fun @ImageCrop(p0: ptr<Image>, p1: simd<f32, 4>) >> void;
+fun ImageCrop(p0: ptr<Image>, p1: Rectangle) >> void {
+    @ImageCrop(p0, __abi_pack_Rectangle(p1));
+}
+
+wrap @ImageAlphaCrop(p0: ptr<Image>, p1: f32) >> void;
+fun @ImageAlphaClear(p0: ptr<Image>, p1: u32, p2: f32) >> void;
+fun ImageAlphaClear(p0: ptr<Image>, p1: Color, p2: f32) >> void {
+    @ImageAlphaClear(p0, __abi_pack_Color(p1), p2);
+}
+
+wrap @ImageAlphaMask(p0: ptr<Image>, p1: Image) >> void;
+wrap @ImageAlphaPremultiply(p0: ptr<Image>) >> void;
+wrap @ImageBlurGaussian(p0: ptr<Image>, p1: i32) >> void;
+wrap @ImageKernelConvolution(p0: ptr<Image>, p1: ptr<f32>, p2: i32) >> void;
+wrap @ImageResize(p0: ptr<Image>, p1: i32, p2: i32) >> void;
+wrap @ImageResizeNN(p0: ptr<Image>, p1: i32, p2: i32) >> void;
+fun @ImageResizeCanvas(p0: ptr<Image>, p1: i32, p2: i32, p3: i32, p4: i32, p5: u32) >> void;
+fun ImageResizeCanvas(p0: ptr<Image>, p1: i32, p2: i32, p3: i32, p4: i32, p5: Color) >> void {
+    @ImageResizeCanvas(p0, p1, p2, p3, p4, __abi_pack_Color(p5));
+}
+
+wrap @ImageMipmaps(p0: ptr<Image>) >> void;
+wrap @ImageDither(p0: ptr<Image>, p1: i32, p2: i32, p3: i32, p4: i32) >> void;
+wrap @ImageFlipVertical(p0: ptr<Image>) >> void;
+wrap @ImageFlipHorizontal(p0: ptr<Image>) >> void;
+wrap @ImageRotate(p0: ptr<Image>, p1: i32) >> void;
+wrap @ImageRotateCW(p0: ptr<Image>) >> void;
+wrap @ImageRotateCCW(p0: ptr<Image>) >> void;
+fun @ImageColorTint(p0: ptr<Image>, p1: u32) >> void;
+fun ImageColorTint(p0: ptr<Image>, p1: Color) >> void {
+    @ImageColorTint(p0, __abi_pack_Color(p1));
+}
+
+wrap @ImageColorInvert(p0: ptr<Image>) >> void;
+wrap @ImageColorGrayscale(p0: ptr<Image>) >> void;
+wrap @ImageColorContrast(p0: ptr<Image>, p1: f32) >> void;
+wrap @ImageColorBrightness(p0: ptr<Image>, p1: i32) >> void;
+fun @ImageColorReplace(p0: ptr<Image>, p1: u32, p2: u32) >> void;
+fun ImageColorReplace(p0: ptr<Image>, p1: Color, p2: Color) >> void {
+    @ImageColorReplace(p0, __abi_pack_Color(p1), __abi_pack_Color(p2));
+}
+
+wrap @LoadImageColors(p0: Image) >> ptr<Color>;
+wrap @LoadImagePalette(p0: Image, p1: i32, p2: ptr<i32>) >> ptr<Color>;
+wrap @UnloadImageColors(p0: ptr<Color>) >> void;
+wrap @UnloadImagePalette(p0: ptr<Color>) >> void;
+fun @GetImageAlphaBorder(p0: Image, p1: f32) >> simd<f32, 4>;
+
+fun @GetImageColor(p0: Image, p1: i32, p2: i32) >> u32;
+
+fun @ImageClearBackground(p0: ptr<Image>, p1: u32) >> void;
+fun ImageClearBackground(p0: ptr<Image>, p1: Color) >> void {
+    @ImageClearBackground(p0, __abi_pack_Color(p1));
+}
+
+fun @ImageDrawPixel(p0: ptr<Image>, p1: i32, p2: i32, p3: u32) >> void;
+fun ImageDrawPixel(p0: ptr<Image>, p1: i32, p2: i32, p3: Color) >> void {
+    @ImageDrawPixel(p0, p1, p2, __abi_pack_Color(p3));
+}
+
+fun @ImageDrawPixelV(p0: ptr<Image>, p1: simd<f32, 2>, p2: u32) >> void;
+fun ImageDrawPixelV(p0: ptr<Image>, p1: Vector2, p2: Color) >> void {
+    @ImageDrawPixelV(p0, __abi_pack_Vector2(p1), __abi_pack_Color(p2));
+}
+
+fun @ImageDrawLine(p0: ptr<Image>, p1: i32, p2: i32, p3: i32, p4: i32, p5: u32) >> void;
+fun ImageDrawLine(p0: ptr<Image>, p1: i32, p2: i32, p3: i32, p4: i32, p5: Color) >> void {
+    @ImageDrawLine(p0, p1, p2, p3, p4, __abi_pack_Color(p5));
+}
+
+fun @ImageDrawLineV(p0: ptr<Image>, p1: simd<f32, 2>, p2: simd<f32, 2>, p3: u32) >> void;
+fun ImageDrawLineV(p0: ptr<Image>, p1: Vector2, p2: Vector2, p3: Color) >> void {
+    @ImageDrawLineV(p0, __abi_pack_Vector2(p1), __abi_pack_Vector2(p2), __abi_pack_Color(p3));
+}
+
+fun @ImageDrawLineEx(p0: ptr<Image>, p1: simd<f32, 2>, p2: simd<f32, 2>, p3: i32, p4: u32) >> void;
+fun ImageDrawLineEx(p0: ptr<Image>, p1: Vector2, p2: Vector2, p3: i32, p4: Color) >> void {
+    @ImageDrawLineEx(p0, __abi_pack_Vector2(p1), __abi_pack_Vector2(p2), p3, __abi_pack_Color(p4));
+}
+
+fun @ImageDrawCircle(p0: ptr<Image>, p1: i32, p2: i32, p3: i32, p4: u32) >> void;
+fun ImageDrawCircle(p0: ptr<Image>, p1: i32, p2: i32, p3: i32, p4: Color) >> void {
+    @ImageDrawCircle(p0, p1, p2, p3, __abi_pack_Color(p4));
+}
+
+fun @ImageDrawCircleV(p0: ptr<Image>, p1: simd<f32, 2>, p2: i32, p3: u32) >> void;
+fun ImageDrawCircleV(p0: ptr<Image>, p1: Vector2, p2: i32, p3: Color) >> void {
+    @ImageDrawCircleV(p0, __abi_pack_Vector2(p1), p2, __abi_pack_Color(p3));
+}
+
+fun @ImageDrawCircleLines(p0: ptr<Image>, p1: i32, p2: i32, p3: i32, p4: u32) >> void;
+fun ImageDrawCircleLines(p0: ptr<Image>, p1: i32, p2: i32, p3: i32, p4: Color) >> void {
+    @ImageDrawCircleLines(p0, p1, p2, p3, __abi_pack_Color(p4));
+}
+
+fun @ImageDrawCircleLinesV(p0: ptr<Image>, p1: simd<f32, 2>, p2: i32, p3: u32) >> void;
+fun ImageDrawCircleLinesV(p0: ptr<Image>, p1: Vector2, p2: i32, p3: Color) >> void {
+    @ImageDrawCircleLinesV(p0, __abi_pack_Vector2(p1), p2, __abi_pack_Color(p3));
+}
+
+fun @ImageDrawRectangle(p0: ptr<Image>, p1: i32, p2: i32, p3: i32, p4: i32, p5: u32) >> void;
+fun ImageDrawRectangle(p0: ptr<Image>, p1: i32, p2: i32, p3: i32, p4: i32, p5: Color) >> void {
+    @ImageDrawRectangle(p0, p1, p2, p3, p4, __abi_pack_Color(p5));
+}
+
+fun @ImageDrawRectangleV(p0: ptr<Image>, p1: simd<f32, 2>, p2: simd<f32, 2>, p3: u32) >> void;
+fun ImageDrawRectangleV(p0: ptr<Image>, p1: Vector2, p2: Vector2, p3: Color) >> void {
+    @ImageDrawRectangleV(p0, __abi_pack_Vector2(p1), __abi_pack_Vector2(p2), __abi_pack_Color(p3));
+}
+
+fun @ImageDrawRectangleRec(p0: ptr<Image>, p1: simd<f32, 4>, p2: u32) >> void;
+fun ImageDrawRectangleRec(p0: ptr<Image>, p1: Rectangle, p2: Color) >> void {
+    @ImageDrawRectangleRec(p0, __abi_pack_Rectangle(p1), __abi_pack_Color(p2));
+}
+
+fun @ImageDrawRectangleLines(p0: ptr<Image>, p1: simd<f32, 4>, p2: i32, p3: u32) >> void;
+fun ImageDrawRectangleLines(p0: ptr<Image>, p1: Rectangle, p2: i32, p3: Color) >> void {
+    @ImageDrawRectangleLines(p0, __abi_pack_Rectangle(p1), p2, __abi_pack_Color(p3));
+}
+
+fun @ImageDrawTriangle(p0: ptr<Image>, p1: simd<f32, 2>, p2: simd<f32, 2>, p3: simd<f32, 2>, p4: u32) >> void;
+fun ImageDrawTriangle(p0: ptr<Image>, p1: Vector2, p2: Vector2, p3: Vector2, p4: Color) >> void {
+    @ImageDrawTriangle(p0, __abi_pack_Vector2(p1), __abi_pack_Vector2(p2), __abi_pack_Vector2(p3), __abi_pack_Color(p4));
+}
+
+fun @ImageDrawTriangleEx(p0: ptr<Image>, p1: simd<f32, 2>, p2: simd<f32, 2>, p3: simd<f32, 2>, p4: u32, p5: u32, p6: u32) >> void;
+fun ImageDrawTriangleEx(p0: ptr<Image>, p1: Vector2, p2: Vector2, p3: Vector2, p4: Color, p5: Color, p6: Color) >> void {
+    @ImageDrawTriangleEx(p0, __abi_pack_Vector2(p1), __abi_pack_Vector2(p2), __abi_pack_Vector2(p3), __abi_pack_Color(p4), __abi_pack_Color(p5), __abi_pack_Color(p6));
+}
+
+fun @ImageDrawTriangleLines(p0: ptr<Image>, p1: simd<f32, 2>, p2: simd<f32, 2>, p3: simd<f32, 2>, p4: u32) >> void;
+fun ImageDrawTriangleLines(p0: ptr<Image>, p1: Vector2, p2: Vector2, p3: Vector2, p4: Color) >> void {
+    @ImageDrawTriangleLines(p0, __abi_pack_Vector2(p1), __abi_pack_Vector2(p2), __abi_pack_Vector2(p3), __abi_pack_Color(p4));
+}
+
+fun @ImageDrawTriangleFan(p0: ptr<Image>, p1: ptr<Vector2>, p2: i32, p3: u32) >> void;
+fun ImageDrawTriangleFan(p0: ptr<Image>, p1: ptr<Vector2>, p2: i32, p3: Color) >> void {
+    @ImageDrawTriangleFan(p0, p1, p2, __abi_pack_Color(p3));
+}
+
+fun @ImageDrawTriangleStrip(p0: ptr<Image>, p1: ptr<Vector2>, p2: i32, p3: u32) >> void;
+fun ImageDrawTriangleStrip(p0: ptr<Image>, p1: ptr<Vector2>, p2: i32, p3: Color) >> void {
+    @ImageDrawTriangleStrip(p0, p1, p2, __abi_pack_Color(p3));
+}
+
+fun @ImageDraw(p0: ptr<Image>, p1: Image, p2: simd<f32, 4>, p3: simd<f32, 4>, p4: u32) >> void;
+
+fun @ImageDrawText(p0: ptr<Image>, p1: ptr<u8>, p2: i32, p3: i32, p4: i32, p5: u32) >> void;
+fun ImageDrawText(p0: ptr<Image>, p1: ptr<u8>, p2: i32, p3: i32, p4: i32, p5: Color) >> void {
+    @ImageDrawText(p0, p1, p2, p3, p4, __abi_pack_Color(p5));
+}
+
+fun @ImageDrawTextEx(p0: ptr<Image>, p1: Font, p2: ptr<u8>, p3: simd<f32, 2>, p4: f32, p5: f32, p6: u32) >> void;
+
+wrap @LoadTexture(p0: ptr<u8>) >> Texture;
+wrap @LoadTextureFromImage(p0: Image) >> Texture;
+wrap @LoadTextureCubemap(p0: Image, p1: i32) >> Texture;
+wrap @LoadRenderTexture(p0: i32, p1: i32) >> RenderTexture;
+wrap @IsTextureValid(p0: Texture) >> bool;
+wrap @UnloadTexture(p0: Texture) >> void;
+wrap @IsRenderTextureValid(p0: RenderTexture) >> bool;
+wrap @UnloadRenderTexture(p0: RenderTexture) >> void;
+wrap @UpdateTexture(p0: Texture, p1: ptr<void>) >> void;
+fun @UpdateTextureRec(p0: Texture, p1: simd<f32, 4>, p2: ptr<void>) >> void;
+
+wrap @GenTextureMipmaps(p0: ptr<Texture>) >> void;
+wrap @SetTextureFilter(p0: Texture, p1: i32) >> void;
+wrap @SetTextureWrap(p0: Texture, p1: i32) >> void;
+fun @DrawTexture(p0: Texture, p1: i32, p2: i32, p3: u32) >> void;
+
+fun @DrawTextureV(p0: Texture, p1: simd<f32, 2>, p2: u32) >> void;
+
+fun @DrawTextureEx(p0: Texture, p1: simd<f32, 2>, p2: f32, p3: f32, p4: u32) >> void;
+
+fun @DrawTextureRec(p0: Texture, p1: simd<f32, 4>, p2: simd<f32, 2>, p3: u32) >> void;
+
+fun @DrawTexturePro(p0: Texture, p1: simd<f32, 4>, p2: simd<f32, 4>, p3: simd<f32, 2>, p4: f32, p5: u32) >> void;
+
+fun @DrawTextureNPatch(p0: Texture, p1: NPatchInfo, p2: simd<f32, 4>, p3: simd<f32, 2>, p4: f32, p5: u32) >> void;
+
+fun @ColorIsEqual(p0: u32, p1: u32) >> bool;
+fun ColorIsEqual(p0: Color, p1: Color) >> bool {
+    return @ColorIsEqual(__abi_pack_Color(p0), __abi_pack_Color(p1));
+}
+
+fun @Fade(p0: u32, p1: f32) >> u32;
+fun Fade(p0: Color, p1: f32) >> Color {
+    return __abi_unpack_Color(@Fade(__abi_pack_Color(p0), p1));
+}
+
+fun @ColorToInt(p0: u32) >> i32;
+fun ColorToInt(p0: Color) >> i32 {
+    return @ColorToInt(__abi_pack_Color(p0));
+}
+
+fun @ColorNormalize(p0: u32) >> simd<f32, 4>;
+fun ColorNormalize(p0: Color) >> Vector4 {
+    return __abi_unpack_Vector4(@ColorNormalize(__abi_pack_Color(p0)));
+}
+
+fun @ColorFromNormalized(p0: simd<f32, 4>) >> u32;
+fun ColorFromNormalized(p0: Vector4) >> Color {
+    return __abi_unpack_Color(@ColorFromNormalized(__abi_pack_Vector4(p0)));
+}
+
+fun @ColorToHSV(p0: u32) >> Vector3;
+
+fun @ColorFromHSV(p0: f32, p1: f32, p2: f32) >> u32;
+fun ColorFromHSV(p0: f32, p1: f32, p2: f32) >> Color {
+    return __abi_unpack_Color(@ColorFromHSV(p0, p1, p2));
+}
+
+fun @ColorTint(p0: u32, p1: u32) >> u32;
+fun ColorTint(p0: Color, p1: Color) >> Color {
+    return __abi_unpack_Color(@ColorTint(__abi_pack_Color(p0), __abi_pack_Color(p1)));
+}
+
+fun @ColorBrightness(p0: u32, p1: f32) >> u32;
+fun ColorBrightness(p0: Color, p1: f32) >> Color {
+    return __abi_unpack_Color(@ColorBrightness(__abi_pack_Color(p0), p1));
+}
+
+fun @ColorContrast(p0: u32, p1: f32) >> u32;
+fun ColorContrast(p0: Color, p1: f32) >> Color {
+    return __abi_unpack_Color(@ColorContrast(__abi_pack_Color(p0), p1));
+}
+
+fun @ColorAlpha(p0: u32, p1: f32) >> u32;
+fun ColorAlpha(p0: Color, p1: f32) >> Color {
+    return __abi_unpack_Color(@ColorAlpha(__abi_pack_Color(p0), p1));
+}
+
+fun @ColorAlphaBlend(p0: u32, p1: u32, p2: u32) >> u32;
+fun ColorAlphaBlend(p0: Color, p1: Color, p2: Color) >> Color {
+    return __abi_unpack_Color(@ColorAlphaBlend(__abi_pack_Color(p0), __abi_pack_Color(p1), __abi_pack_Color(p2)));
+}
+
+fun @ColorLerp(p0: u32, p1: u32, p2: f32) >> u32;
+fun ColorLerp(p0: Color, p1: Color, p2: f32) >> Color {
+    return __abi_unpack_Color(@ColorLerp(__abi_pack_Color(p0), __abi_pack_Color(p1), p2));
+}
+
+fun @GetColor(p0: u32) >> u32;
+fun GetColor(p0: u32) >> Color {
+    return __abi_unpack_Color(@GetColor(p0));
+}
+
+fun @GetPixelColor(p0: ptr<void>, p1: i32) >> u32;
+fun GetPixelColor(p0: ptr<void>, p1: i32) >> Color {
+    return __abi_unpack_Color(@GetPixelColor(p0, p1));
+}
+
+fun @SetPixelColor(p0: ptr<void>, p1: u32, p2: i32) >> void;
+fun SetPixelColor(p0: ptr<void>, p1: Color, p2: i32) >> void {
+    @SetPixelColor(p0, __abi_pack_Color(p1), p2);
+}
+
+wrap @GetPixelDataSize(p0: i32, p1: i32, p2: i32) >> i32;
+wrap @GetFontDefault() >> Font;
+wrap @LoadFont(p0: ptr<u8>) >> Font;
+wrap @LoadFontEx(p0: ptr<u8>, p1: i32, p2: ptr<i32>, p3: i32) >> Font;
+fun @LoadFontFromImage(p0: Image, p1: u32, p2: i32) >> Font;
+
+wrap @LoadFontFromMemory(p0: ptr<u8>, p1: ptr<u8>, p2: i32, p3: i32, p4: ptr<i32>, p5: i32) >> Font;
+wrap @IsFontValid(p0: Font) >> bool;
+wrap @LoadFontData(p0: ptr<u8>, p1: i32, p2: i32, p3: ptr<i32>, p4: i32, p5: i32, p6: ptr<i32>) >> ptr<GlyphInfo>;
+wrap @GenImageFontAtlas(p0: ptr<GlyphInfo>, p1: ptr<ptr<Rectangle>>, p2: i32, p3: i32, p4: i32, p5: i32) >> Image;
+wrap @UnloadFontData(p0: ptr<GlyphInfo>, p1: i32) >> void;
+wrap @UnloadFont(p0: Font) >> void;
+wrap @ExportFontAsCode(p0: Font, p1: ptr<u8>) >> bool;
+wrap @DrawFPS(p0: i32, p1: i32) >> void;
+fun @DrawText(p0: ptr<u8>, p1: i32, p2: i32, p3: i32, p4: u32) >> void;
+fun DrawText(p0: ptr<u8>, p1: i32, p2: i32, p3: i32, p4: Color) >> void {
+    @DrawText(p0, p1, p2, p3, __abi_pack_Color(p4));
+}
+
+fun @DrawTextEx(p0: Font, p1: ptr<u8>, p2: simd<f32, 2>, p3: f32, p4: f32, p5: u32) >> void;
+
+fun @DrawTextPro(p0: Font, p1: ptr<u8>, p2: simd<f32, 2>, p3: simd<f32, 2>, p4: f32, p5: f32, p6: f32, p7: u32) >> void;
+
+fun @DrawTextCodepoint(p0: Font, p1: i32, p2: simd<f32, 2>, p3: f32, p4: u32) >> void;
+
+fun @DrawTextCodepoints(p0: Font, p1: ptr<i32>, p2: i32, p3: simd<f32, 2>, p4: f32, p5: f32, p6: u32) >> void;
+
+wrap @SetTextLineSpacing(p0: i32) >> void;
+wrap @MeasureText(p0: ptr<u8>, p1: i32) >> i32;
+fun @MeasureTextEx(p0: Font, p1: ptr<u8>, p2: f32, p3: f32) >> simd<f32, 2>;
+
+wrap @GetGlyphIndex(p0: Font, p1: i32) >> i32;
+wrap @GetGlyphInfo(p0: Font, p1: i32) >> GlyphInfo;
+fun @GetGlyphAtlasRec(p0: Font, p1: i32) >> simd<f32, 4>;
+
+wrap @LoadUTF8(p0: ptr<i32>, p1: i32) >> ptr<u8>;
+wrap @UnloadUTF8(p0: ptr<u8>) >> void;
+wrap @LoadCodepoints(p0: ptr<u8>, p1: ptr<i32>) >> ptr<i32>;
+wrap @UnloadCodepoints(p0: ptr<i32>) >> void;
+wrap @GetCodepointCount(p0: ptr<u8>) >> i32;
+wrap @GetCodepoint(p0: ptr<u8>, p1: ptr<i32>) >> i32;
+wrap @GetCodepointNext(p0: ptr<u8>, p1: ptr<i32>) >> i32;
+wrap @GetCodepointPrevious(p0: ptr<u8>, p1: ptr<i32>) >> i32;
+wrap @CodepointToUTF8(p0: i32, p1: ptr<i32>) >> ptr<u8>;
+wrap @LoadTextLines(p0: ptr<u8>, p1: ptr<i32>) >> ptr<ptr<u8>>;
+wrap @UnloadTextLines(p0: ptr<ptr<u8>>, p1: i32) >> void;
+wrap @TextCopy(p0: ptr<u8>, p1: ptr<u8>) >> i32;
+wrap @TextIsEqual(p0: ptr<u8>, p1: ptr<u8>) >> bool;
+wrap @TextLength(p0: ptr<u8>) >> u32;
+wrap @TextFormat(p0: ptr<u8>, __varargs: vararg<_>) >> ptr<u8>;
+wrap @TextSubtext(p0: ptr<u8>, p1: i32, p2: i32) >> ptr<u8>;
+wrap @TextRemoveSpaces(p0: ptr<u8>) >> ptr<u8>;
+wrap @GetTextBetween(p0: ptr<u8>, p1: ptr<u8>, p2: ptr<u8>) >> ptr<u8>;
+wrap @TextReplace(p0: ptr<u8>, p1: ptr<u8>, p2: ptr<u8>) >> ptr<u8>;
+wrap @TextReplaceBetween(p0: ptr<u8>, p1: ptr<u8>, p2: ptr<u8>, p3: ptr<u8>) >> ptr<u8>;
+wrap @TextInsert(p0: ptr<u8>, p1: ptr<u8>, p2: i32) >> ptr<u8>;
+wrap @TextJoin(p0: ptr<ptr<u8>>, p1: i32, p2: ptr<u8>) >> ptr<u8>;
+wrap @TextSplit(p0: ptr<u8>, p1: i8, p2: ptr<i32>) >> ptr<ptr<u8>>;
+wrap @TextAppend(p0: ptr<u8>, p1: ptr<u8>, p2: ptr<i32>) >> void;
+wrap @TextFindIndex(p0: ptr<u8>, p1: ptr<u8>) >> i32;
+wrap @TextToUpper(p0: ptr<u8>) >> ptr<u8>;
+wrap @TextToLower(p0: ptr<u8>) >> ptr<u8>;
+wrap @TextToPascal(p0: ptr<u8>) >> ptr<u8>;
+wrap @TextToSnake(p0: ptr<u8>) >> ptr<u8>;
+wrap @TextToCamel(p0: ptr<u8>) >> ptr<u8>;
+wrap @TextToInteger(p0: ptr<u8>) >> i32;
+wrap @TextToFloat(p0: ptr<u8>) >> f32;
+fun @DrawLine3D(p0: Vector3, p1: Vector3, p2: u32) >> void;
+
+fun @DrawPoint3D(p0: Vector3, p1: u32) >> void;
+
+fun @DrawCircle3D(p0: Vector3, p1: f32, p2: Vector3, p3: f32, p4: u32) >> void;
+
+fun @DrawTriangle3D(p0: Vector3, p1: Vector3, p2: Vector3, p3: u32) >> void;
+
+fun @DrawTriangleStrip3D(p0: ptr<Vector3>, p1: i32, p2: u32) >> void;
+fun DrawTriangleStrip3D(p0: ptr<Vector3>, p1: i32, p2: Color) >> void {
+    @DrawTriangleStrip3D(p0, p1, __abi_pack_Color(p2));
+}
+
+fun @DrawCube(p0: Vector3, p1: f32, p2: f32, p3: f32, p4: u32) >> void;
+
+fun @DrawCubeV(p0: Vector3, p1: Vector3, p2: u32) >> void;
+
+fun @DrawCubeWires(p0: Vector3, p1: f32, p2: f32, p3: f32, p4: u32) >> void;
+
+fun @DrawCubeWiresV(p0: Vector3, p1: Vector3, p2: u32) >> void;
+
+fun @DrawSphere(p0: Vector3, p1: f32, p2: u32) >> void;
+
+fun @DrawSphereEx(p0: Vector3, p1: f32, p2: i32, p3: i32, p4: u32) >> void;
+
+fun @DrawSphereWires(p0: Vector3, p1: f32, p2: i32, p3: i32, p4: u32) >> void;
+
+fun @DrawCylinder(p0: Vector3, p1: f32, p2: f32, p3: f32, p4: i32, p5: u32) >> void;
+
+fun @DrawCylinderEx(p0: Vector3, p1: Vector3, p2: f32, p3: f32, p4: i32, p5: u32) >> void;
+
+fun @DrawCylinderWires(p0: Vector3, p1: f32, p2: f32, p3: f32, p4: i32, p5: u32) >> void;
+
+fun @DrawCylinderWiresEx(p0: Vector3, p1: Vector3, p2: f32, p3: f32, p4: i32, p5: u32) >> void;
+
+fun @DrawCapsule(p0: Vector3, p1: Vector3, p2: f32, p3: i32, p4: i32, p5: u32) >> void;
+
+fun @DrawCapsuleWires(p0: Vector3, p1: Vector3, p2: f32, p3: i32, p4: i32, p5: u32) >> void;
+
+fun @DrawPlane(p0: Vector3, p1: simd<f32, 2>, p2: u32) >> void;
+
+fun @DrawRay(p0: Ray, p1: u32) >> void;
+
+wrap @DrawGrid(p0: i32, p1: f32) >> void;
+wrap @LoadModel(p0: ptr<u8>) >> Model;
+wrap @LoadModelFromMesh(p0: Mesh) >> Model;
+wrap @IsModelValid(p0: Model) >> bool;
+wrap @UnloadModel(p0: Model) >> void;
+wrap @GetModelBoundingBox(p0: Model) >> BoundingBox;
+fun @DrawModel(p0: Model, p1: Vector3, p2: f32, p3: u32) >> void;
+
+fun @DrawModelEx(p0: Model, p1: Vector3, p2: Vector3, p3: f32, p4: Vector3, p5: u32) >> void;
+
+fun @DrawModelWires(p0: Model, p1: Vector3, p2: f32, p3: u32) >> void;
+
+fun @DrawModelWiresEx(p0: Model, p1: Vector3, p2: Vector3, p3: f32, p4: Vector3, p5: u32) >> void;
+
+fun @DrawModelPoints(p0: Model, p1: Vector3, p2: f32, p3: u32) >> void;
+
+fun @DrawModelPointsEx(p0: Model, p1: Vector3, p2: Vector3, p3: f32, p4: Vector3, p5: u32) >> void;
+
+fun @DrawBoundingBox(p0: BoundingBox, p1: u32) >> void;
+
+fun @DrawBillboard(p0: Camera3D, p1: Texture, p2: Vector3, p3: f32, p4: u32) >> void;
+
+fun @DrawBillboardRec(p0: Camera3D, p1: Texture, p2: simd<f32, 4>, p3: Vector3, p4: simd<f32, 2>, p5: u32) >> void;
+
+fun @DrawBillboardPro(p0: Camera3D, p1: Texture, p2: simd<f32, 4>, p3: Vector3, p4: Vector3, p5: simd<f32, 2>, p6: simd<f32, 2>, p7: f32, p8: u32) >> void;
+
+wrap @UploadMesh(p0: ptr<Mesh>, p1: bool) >> void;
+wrap @UpdateMeshBuffer(p0: Mesh, p1: i32, p2: ptr<void>, p3: i32, p4: i32) >> void;
+wrap @UnloadMesh(p0: Mesh) >> void;
+wrap @DrawMesh(p0: Mesh, p1: Material, p2: Matrix) >> void;
+wrap @DrawMeshInstanced(p0: Mesh, p1: Material, p2: ptr<Matrix>, p3: i32) >> void;
+wrap @GetMeshBoundingBox(p0: Mesh) >> BoundingBox;
+wrap @GenMeshTangents(p0: ptr<Mesh>) >> void;
+wrap @ExportMesh(p0: Mesh, p1: ptr<u8>) >> bool;
+wrap @ExportMeshAsCode(p0: Mesh, p1: ptr<u8>) >> bool;
+wrap @GenMeshPoly(p0: i32, p1: f32) >> Mesh;
+wrap @GenMeshPlane(p0: f32, p1: f32, p2: i32, p3: i32) >> Mesh;
+wrap @GenMeshCube(p0: f32, p1: f32, p2: f32) >> Mesh;
+wrap @GenMeshSphere(p0: f32, p1: i32, p2: i32) >> Mesh;
+wrap @GenMeshHemiSphere(p0: f32, p1: i32, p2: i32) >> Mesh;
+wrap @GenMeshCylinder(p0: f32, p1: f32, p2: i32) >> Mesh;
+wrap @GenMeshCone(p0: f32, p1: f32, p2: i32) >> Mesh;
+wrap @GenMeshTorus(p0: f32, p1: f32, p2: i32, p3: i32) >> Mesh;
+wrap @GenMeshKnot(p0: f32, p1: f32, p2: i32, p3: i32) >> Mesh;
+wrap @GenMeshHeightmap(p0: Image, p1: Vector3) >> Mesh;
+wrap @GenMeshCubicmap(p0: Image, p1: Vector3) >> Mesh;
+wrap @LoadMaterials(p0: ptr<u8>, p1: ptr<i32>) >> ptr<Material>;
+wrap @LoadMaterialDefault() >> Material;
+wrap @IsMaterialValid(p0: Material) >> bool;
+wrap @UnloadMaterial(p0: Material) >> void;
+wrap @SetMaterialTexture(p0: ptr<Material>, p1: i32, p2: Texture) >> void;
+wrap @SetModelMeshMaterial(p0: ptr<Model>, p1: i32, p2: i32) >> void;
+wrap @LoadModelAnimations(p0: ptr<u8>, p1: ptr<i32>) >> ptr<ModelAnimation>;
+wrap @UpdateModelAnimation(p0: Model, p1: ModelAnimation, p2: i32) >> void;
+wrap @UpdateModelAnimationBones(p0: Model, p1: ModelAnimation, p2: i32) >> void;
+wrap @UnloadModelAnimation(p0: ModelAnimation) >> void;
+wrap @UnloadModelAnimations(p0: ptr<ModelAnimation>, p1: i32) >> void;
+wrap @IsModelAnimationValid(p0: Model, p1: ModelAnimation) >> bool;
+wrap @CheckCollisionSpheres(p0: Vector3, p1: f32, p2: Vector3, p3: f32) >> bool;
+wrap @CheckCollisionBoxes(p0: BoundingBox, p1: BoundingBox) >> bool;
+wrap @CheckCollisionBoxSphere(p0: BoundingBox, p1: Vector3, p2: f32) >> bool;
+wrap @GetRayCollisionSphere(p0: Ray, p1: Vector3, p2: f32) >> RayCollision;
+wrap @GetRayCollisionBox(p0: Ray, p1: BoundingBox) >> RayCollision;
+wrap @GetRayCollisionMesh(p0: Ray, p1: Mesh, p2: Matrix) >> RayCollision;
+wrap @GetRayCollisionTriangle(p0: Ray, p1: Vector3, p2: Vector3, p3: Vector3) >> RayCollision;
+wrap @GetRayCollisionQuad(p0: Ray, p1: Vector3, p2: Vector3, p3: Vector3, p4: Vector3) >> RayCollision;
+wrap @InitAudioDevice() >> void;
+wrap @CloseAudioDevice() >> void;
+wrap @IsAudioDeviceReady() >> bool;
+wrap @SetMasterVolume(p0: f32) >> void;
+wrap @GetMasterVolume() >> f32;
+wrap @LoadWave(p0: ptr<u8>) >> Wave;
+wrap @LoadWaveFromMemory(p0: ptr<u8>, p1: ptr<u8>, p2: i32) >> Wave;
+wrap @IsWaveValid(p0: Wave) >> bool;
+wrap @LoadSound(p0: ptr<u8>) >> Sound;
+wrap @LoadSoundFromWave(p0: Wave) >> Sound;
+wrap @LoadSoundAlias(p0: Sound) >> Sound;
+wrap @IsSoundValid(p0: Sound) >> bool;
+wrap @UpdateSound(p0: Sound, p1: ptr<void>, p2: i32) >> void;
+wrap @UnloadWave(p0: Wave) >> void;
+wrap @UnloadSound(p0: Sound) >> void;
+wrap @UnloadSoundAlias(p0: Sound) >> void;
+wrap @ExportWave(p0: Wave, p1: ptr<u8>) >> bool;
+wrap @ExportWaveAsCode(p0: Wave, p1: ptr<u8>) >> bool;
+wrap @PlaySound(p0: Sound) >> void;
+wrap @StopSound(p0: Sound) >> void;
+wrap @PauseSound(p0: Sound) >> void;
+wrap @ResumeSound(p0: Sound) >> void;
+wrap @IsSoundPlaying(p0: Sound) >> bool;
+wrap @SetSoundVolume(p0: Sound, p1: f32) >> void;
+wrap @SetSoundPitch(p0: Sound, p1: f32) >> void;
+wrap @SetSoundPan(p0: Sound, p1: f32) >> void;
+wrap @WaveCopy(p0: Wave) >> Wave;
+wrap @WaveCrop(p0: ptr<Wave>, p1: i32, p2: i32) >> void;
+wrap @WaveFormat(p0: ptr<Wave>, p1: i32, p2: i32, p3: i32) >> void;
+wrap @LoadWaveSamples(p0: Wave) >> ptr<f32>;
+wrap @UnloadWaveSamples(p0: ptr<f32>) >> void;
+wrap @LoadMusicStream(p0: ptr<u8>) >> Music;
+wrap @LoadMusicStreamFromMemory(p0: ptr<u8>, p1: ptr<u8>, p2: i32) >> Music;
+wrap @IsMusicValid(p0: Music) >> bool;
+wrap @UnloadMusicStream(p0: Music) >> void;
+wrap @PlayMusicStream(p0: Music) >> void;
+wrap @IsMusicStreamPlaying(p0: Music) >> bool;
+wrap @UpdateMusicStream(p0: Music) >> void;
+wrap @StopMusicStream(p0: Music) >> void;
+wrap @PauseMusicStream(p0: Music) >> void;
+wrap @ResumeMusicStream(p0: Music) >> void;
+wrap @SeekMusicStream(p0: Music, p1: f32) >> void;
+wrap @SetMusicVolume(p0: Music, p1: f32) >> void;
+wrap @SetMusicPitch(p0: Music, p1: f32) >> void;
+wrap @SetMusicPan(p0: Music, p1: f32) >> void;
+wrap @GetMusicTimeLength(p0: Music) >> f32;
+wrap @GetMusicTimePlayed(p0: Music) >> f32;
+wrap @LoadAudioStream(p0: u32, p1: u32, p2: u32) >> AudioStream;
+wrap @IsAudioStreamValid(p0: AudioStream) >> bool;
+wrap @UnloadAudioStream(p0: AudioStream) >> void;
+wrap @UpdateAudioStream(p0: AudioStream, p1: ptr<void>, p2: i32) >> void;
+wrap @IsAudioStreamProcessed(p0: AudioStream) >> bool;
+wrap @PlayAudioStream(p0: AudioStream) >> void;
+wrap @PauseAudioStream(p0: AudioStream) >> void;
+wrap @ResumeAudioStream(p0: AudioStream) >> void;
+wrap @IsAudioStreamPlaying(p0: AudioStream) >> bool;
+wrap @StopAudioStream(p0: AudioStream) >> void;
+wrap @SetAudioStreamVolume(p0: AudioStream, p1: f32) >> void;
+wrap @SetAudioStreamPitch(p0: AudioStream, p1: f32) >> void;
+wrap @SetAudioStreamPan(p0: AudioStream, p1: f32) >> void;
+wrap @SetAudioStreamBufferSizeDefault(p0: i32) >> void;
+wrap @SetAudioStreamCallback(p0: AudioStream, p1: ptr<void>) >> void;
+wrap @AttachAudioStreamProcessor(p0: AudioStream, p1: ptr<void>) >> void;
+wrap @DetachAudioStreamProcessor(p0: AudioStream, p1: ptr<void>) >> void;
+wrap @AttachAudioMixedProcessor(p0: ptr<void>) >> void;
+wrap @DetachAudioMixedProcessor(p0: ptr<void>) >> void;

@@ -1,5 +1,0 @@
-... known issues
-
-    bool exiting = WindowShouldClose(); ?? can not use function calls in for
-    for exiting != true { ?? can not use !exiting
-...

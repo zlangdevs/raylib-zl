@@ -1,5 +1,3 @@
-use raylib
-
 fun main() >> i32 {
     i32 screenWidth = 800;
     i32 screenHeight = 450;     
@@ -17,7 +15,7 @@ fun main() >> i32 {
     Color black = Color{r = 0, g = 0, b = 0, a = 255};
     
     bool exiting = WindowShouldClose();
-    for exiting != true {
+    for (exiting != true) {
         Vector2 mouse = GetMousePosition();        
         if CheckCollisionPointCircle(mouse, startPoint, 10.0) && IsMouseButtonDown(MOUSE_BUTTON_LEFT) {moveStartPoint = true;}
         else if CheckCollisionPointCircle(mouse, endPoint, 10.0) && IsMouseButtonDown(MOUSE_BUTTON_LEFT) {moveEndPoint = true;}

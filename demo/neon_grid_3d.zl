@@ -1,0 +1,135 @@
+fun pingPong(frame: i32, period: i32, lo: f32, hi: f32) >> f32 {
+    if period <= 1 { return lo; }
+
+    i32 p = frame % period;
+    if p < 0 { p += period; }
+
+    i32 half = period / 2;
+    if half < 1 { half = 1; }
+
+    f32 t = 0.0;
+    if p < half {
+        t = (p as f32) / (half as f32);
+    } else {
+        t = ((period - p) as f32) / (half as f32);
+    }
+
+    return lo + ((hi - lo) * t);
+}
+
+fun main() >> i32 {
+    i32 screenWidth = 1440;
+    i32 screenHeight = 900;
+
+    SetConfigFlags(FLAG_MSAA_4X_HINT as u32);
+    InitWindow(screenWidth, screenHeight, "zlang polyforge reactor");
+
+    Camera3D camera;
+    camera.position = Vector3{x = 26.0, y = 18.0, z = 26.0};
+    camera.target = Vector3{x = 0.0, y = 2.0, z = 0.0};
+    camera.up = Vector3{x = 0.0, y = 1.0, z = 0.0};
+    camera.fovy = 45.0;
+    camera.projection = CAMERA_PERSPECTIVE;
+
+    Vector3 orbitTarget = camera.target;
+
+    Color bg = Color{r = 7, g = 11, b = 20, a = 255};
+    Color cyan = Color{r = 0, g = 236, b = 255, a = 255};
+    Color magenta = Color{r = 255, g = 72, b = 180, a = 255};
+    Color blue = Color{r = 86, g = 168, b = 255, a = 255};
+    Color lime = Color{r = 156, g = 255, b = 92, a = 255};
+    Color amber = Color{r = 255, g = 188, b = 58, a = 255};
+    Color wire = Color{r = 210, g = 230, b = 255, a = 255};
+    Color beam = Color{r = 126, g = 220, b = 255, a = 240};
+    Color hud = Color{r = 212, g = 242, b = 255, a = 255};
+    Color overlayTop = Color{r = 20, g = 35, b = 56, a = 200};
+    Color overlayBottom = Color{r = 10, g = 16, b = 28, a = 12};
+
+    i32 frame = 0;
+
+    SetTargetFPS(60);
+
+    bool exiting = WindowShouldClose();
+    for (exiting != true) {
+        frame += 1;
+
+        if IsKeyDown(KEY_LEFT) { orbitTarget.x -= 0.10; }
+        if IsKeyDown(KEY_RIGHT) { orbitTarget.x += 0.10; }
+        if IsKeyDown(KEY_UP) { orbitTarget.z -= 0.10; }
+        if IsKeyDown(KEY_DOWN) { orbitTarget.z += 0.10; }
+
+        orbitTarget.y = pingPong(frame, 320, 1.2, 3.8);
+
+        camera.target = orbitTarget;
+        UpdateCamera(&camera, CAMERA_ORBITAL);
+
+        f32 corePulse = pingPong(frame, 180, 0.75, 1.45);
+        f32 gridPulse = pingPong(frame + 64, 240, 0.90, 1.22);
+
+        f32 orbAX = pingPong(frame + 40, 340, -9.0, 9.0);
+        f32 orbAZ = pingPong(frame + 120, 280, -9.0, 9.0);
+        f32 orbBX = pingPong(frame + 210, 360, -10.0, 10.0);
+        f32 orbBZ = pingPong(frame + 15, 300, -10.0, 10.0);
+
+        BeginDrawing();
+        ClearBackground(bg);
+
+        BeginMode3D(camera);
+
+        DrawGrid(52, gridPulse);
+
+        i32 gx = -12;
+        for (gx <= 12) {
+            i32 gz = -12;
+            for (gz <= 12) {
+                i32 phase = frame + (gx * 19) + (gz * 31);
+                f32 h = pingPong(phase, 260, 0.8, 6.8);
+
+                Vector3 towerPos = Vector3{x = gx as f32, y = h * 0.5, z = gz as f32};
+
+                Color towerColor = cyan;
+                if ((gx + gz) % 5) == 1 { towerColor = blue; }
+                if ((gx + gz) % 5) == 2 { towerColor = magenta; }
+                if ((gx + gz) % 5) == 3 { towerColor = lime; }
+                if ((gx + gz) % 5) == 4 { towerColor = amber; }
+
+                @DrawCube(towerPos, 1.15, h, 1.15, __abi_pack_Color(towerColor));
+                @DrawCubeWires(towerPos, 1.17, h + 0.02, 1.17, __abi_pack_Color(wire));
+
+                if ((gx + gz) % 6) == 0 {
+                    Vector3 capPos = Vector3{x = towerPos.x, y = h + 0.44, z = towerPos.z};
+                    @DrawSphere(capPos, 0.36, __abi_pack_Color(magenta));
+                    @DrawLine3D(Vector3{x = 0.0, y = 5.5, z = 0.0}, capPos, __abi_pack_Color(beam));
+                }
+
+                gz += 3;
+            }
+            gx += 3;
+        }
+
+        @DrawCylinder(Vector3{x = 0.0, y = 2.8, z = 0.0}, 2.2, 1.6, 5.6, 28, __abi_pack_Color(cyan));
+        @DrawCylinderWires(Vector3{x = 0.0, y = 2.8, z = 0.0}, 2.25, 1.65, 5.6, 28, __abi_pack_Color(wire));
+        @DrawSphere(Vector3{x = 0.0, y = 5.95, z = 0.0}, (1.35 as f32) * corePulse, __abi_pack_Color(magenta));
+
+        Vector3 orbA = Vector3{x = orbAX, y = 3.2, z = orbAZ};
+        Vector3 orbB = Vector3{x = orbBX, y = 4.5, z = orbBZ};
+        @DrawSphere(orbA, 0.62, __abi_pack_Color(amber));
+        @DrawSphere(orbB, 0.72, __abi_pack_Color(lime));
+        @DrawLine3D(Vector3{x = 0.0, y = 5.95, z = 0.0}, orbA, __abi_pack_Color(cyan));
+        @DrawLine3D(Vector3{x = 0.0, y = 5.95, z = 0.0}, orbB, __abi_pack_Color(blue));
+
+        EndMode3D();
+
+        DrawRectangleGradientV(0, 0, screenWidth, 150, overlayTop, overlayBottom);
+        DrawText("POLYFORGE REACTOR", 36, 28, 36, cyan);
+        DrawText("full raylib wrapper demo: animated 3D towers + spheres + reactor core", 36, 74, 22, hud);
+        DrawText("arrows move orbit target", 36, 104, 20, hud);
+        DrawFPS(screenWidth - 130, 22);
+
+        EndDrawing();
+        exiting = WindowShouldClose();
+    }
+
+    CloseWindow();
+    return 0;
+}

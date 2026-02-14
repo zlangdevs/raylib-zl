@@ -1,5 +1,3 @@
-use raylib
-
 fun main() >> i32 {
     InitWindow(800, 450, "ZLang");
     SetTargetFPS(60);
@@ -9,7 +7,7 @@ fun main() >> i32 {
     i32 ball_x = 400;
     i32 ball_y = 225;
     bool exiting = WindowShouldClose();
-    for exiting != true {
+    for (exiting != true) {
         BeginDrawing();
         ClearBackground(bg);
         if IsKeyDown(KEY_RIGHT) {ball_x += 2;}
