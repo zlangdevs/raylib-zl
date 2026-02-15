@@ -1,3 +1,5 @@
+use raylib
+
 fun pingPong(frame: i32, period: i32, lo: f32, hi: f32) >> f32 {
     if period <= 1 { return lo; }
 

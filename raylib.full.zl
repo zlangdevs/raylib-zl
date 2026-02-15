@@ -6,6 +6,7 @@
 #flag -ldl
 #flag -lrt
 #flag -lX11
+module raylib;
 
 struct rAudioBuffer {
 }

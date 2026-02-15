@@ -1,3 +1,5 @@
+use raylib
+
 fun main() >> i32 {
     InitWindow(800, 450, "ZLang");
     SetTargetFPS(60);

@@ -1,3 +1,5 @@
+use raylib
+
 fun main() >> i32 {
     i32 screenWidth = 800;
     i32 screenHeight = 450;     
