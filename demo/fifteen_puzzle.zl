@@ -1,0 +1,682 @@
+use raylib
+use std.string
+use std.time
+
+const i32 MIN_SIDE = 3;
+const i32 MAX_SIDE = 6;
+const f32 ANIM_SPEED = 8.5;
+
+struct Layout {
+    x i32,
+    y i32,
+    gap i32,
+    cell i32,
+    board_px i32
+}
+
+arr<u8, 24> _time_text = {0};
+
+fun theme_label(self: i32) >> ptr<u8> {
+    arr<ptr<u8>, 3> labels = {"Theme: Deep Space", "Theme: Neon Rose", "Theme: Mint Terminal"}; 
+    return labels[self % 3];
+}
+
+fun minI32(a: i32, b: i32) >> i32 {
+    if a < b { return a; }
+    return b;
+}
+
+fun maxI32(a: i32, b: i32) >> i32 {
+    if a > b { return a; }
+    return b;
+}
+
+fun clampI32(v: i32, lo: i32, hi: i32) >> i32 {
+    if v < lo { return lo; }
+    if v > hi { return hi; }
+    return v;
+}
+
+fun absI32(v: i32) >> i32 {
+    if v < 0 { return -v; }
+    return v;
+}
+
+fun lerpF32(a: f32, b: f32, t: f32) >> f32 {
+    return a + ((b - a) * t);
+}
+
+fun cell_count(self: i32) >> i32 {
+    return self * self;
+}
+
+fun row_of(self: i32, side: i32) >> i32 {
+    return self / side;
+}
+
+fun col_of(self: i32, side: i32) >> i32 {
+    return self % side;
+}
+
+fun is_adjacent(self: i32, other: i32, side: i32) >> bool {
+    i32 dr = absI32(self.row_of(side) - other.row_of(side));
+    i32 dc = absI32(self.col_of(side) - other.col_of(side));
+    return (dr + dc) == 1;
+}
+
+fun board_init_solved(self: ptr<i32>, side: i32) >> i32 {
+    i32 count = side.cell_count();
+    for i32 i = 0; i < 36; i++ {
+        self[i] = 0;
+    }
+    for i32 i = 0; i < count - 1; i++ {
+        self[i] = i + 1;
+    }
+    self[count - 1] = 0;
+    return count - 1;
+}
+
+fun board_is_solved(self: ptr<i32>, side: i32) >> bool {
+    i32 count = side.cell_count();
+    for i32 i = 0; i < count - 1; i++ {
+        if self[i] != (i + 1) {
+            return false;
+        }
+    }
+    return self[count - 1] == 0;
+}
+
+fun board_apply_move(self: ptr<i32>, blank_idx: i32, tile_idx: i32) >> i32 {
+    self[blank_idx] = self[tile_idx];
+    self[tile_idx] = 0;
+    return tile_idx;
+}
+
+fun random_neighbor(blank_idx: i32, side: i32, prev_blank: i32) >> i32 {
+    arr<i32, 4> candidates;
+    i32 count = 0;
+
+    i32 row = blank_idx.row_of(side);
+    i32 col = blank_idx.col_of(side);
+
+    if col > 0 {
+        candidates[count] = blank_idx - 1;
+        count++;
+    }
+    if col < side - 1 {
+        candidates[count] = blank_idx + 1;
+        count++;
+    }
+    if row > 0 {
+        candidates[count] = blank_idx - side;
+        count++;
+    }
+    if row < side - 1 {
+        candidates[count] = blank_idx + side;
+        count++;
+    }
+
+    if count == 0 { return blank_idx; }
+
+    i32 pick = GetRandomValue(0, count - 1);
+    i32 chosen = candidates[pick];
+
+    if count > 1 && chosen == prev_blank {
+        for i32 tries = 0; tries < 6; tries++ {
+            pick = GetRandomValue(0, count - 1);
+            chosen = candidates[pick];
+            if chosen != prev_blank { break; }
+        }
+    }
+
+    return chosen;
+}
+
+fun board_shuffle(self: ptr<i32>, side: i32) >> i32 {
+    i32 blank = self.board_init_solved(side);
+    i32 prev_blank = -1;
+    i32 steps = side.cell_count() * side.cell_count() * 14;
+
+    for i32 i = 0; i < steps; i++ {
+        i32 old_blank = blank;
+        i32 tile = random_neighbor(blank, side, prev_blank);
+        blank = self.board_apply_move(blank, tile);
+        prev_blank = old_blank;
+    }
+
+    if self.board_is_solved(side) {
+        i32 tile = random_neighbor(blank, side, -1);
+        blank = self.board_apply_move(blank, tile);
+    }
+
+    return blank;
+}
+
+fun compute_layout(self: i32, screen_w: i32, screen_h: i32) >> Layout {
+    Layout layout;
+    layout.gap = 8;
+
+    i32 available_w = screen_w - 64;
+    i32 available_h = screen_h - 320;
+    i32 target = minI32(available_w, available_h);
+    target = maxI32(target, 280);
+
+    i32 cell = (target - (layout.gap * (self + 1))) / self;
+    cell = maxI32(cell, 24);
+
+    layout.cell = cell;
+    layout.board_px = (cell * self) + (layout.gap * (self + 1));
+    layout.x = (screen_w - layout.board_px) / 2;
+    layout.y = 150;
+    return layout;
+}
+
+fun tile_x(self: Layout, col: i32) >> i32 {
+    return self.x + self.gap + (col * (self.cell + self.gap));
+}
+
+fun tile_y(self: Layout, row: i32) >> i32 {
+    return self.y + self.gap + (row * (self.cell + self.gap));
+}
+
+fun tile_at_pixel(self: Layout, mx: i32, my: i32, side: i32) >> i32 {
+    for i32 row = 0; row < side; row++ {
+        for i32 col = 0; col < side; col++ {
+            i32 x = self.tile_x(col);
+            i32 y = self.tile_y(row);
+            if mx >= x && mx <= (x + self.cell) && my >= y && my <= (y + self.cell) {
+                return (row * side) + col;
+            }
+        }
+    }
+    return -1;
+}
+
+fun point_in_rect(px: i32, py: i32, rx: i32, ry: i32, rw: i32, rh: i32) >> bool {
+    if px < rx || py < ry { return false; }
+    if px > (rx + rw) || py > (ry + rh) { return false; }
+    return true;
+}
+
+fun build_line_move_queue(self: i32, tile_idx: i32, side: i32, out_queue: ptr<i32>) >> i32 {
+    if tile_idx == self { return 0; }
+
+    i32 tile_row = tile_idx.row_of(side);
+    i32 tile_col = tile_idx.col_of(side);
+    i32 blank_row = self.row_of(side);
+    i32 blank_col = self.col_of(side);
+    i32 count = 0;
+
+    if tile_row == blank_row {
+        if tile_col < blank_col {
+            i32 dist = blank_col - tile_col;
+            for i32 step = 1; step <= dist; step++ {
+                i32 col = blank_col - step;
+                out_queue[count] = tile_row * side + col;
+                count++;
+            }
+            return count;
+        }
+
+        if tile_col > blank_col {
+            i32 dist = tile_col - blank_col;
+            for i32 step = 1; step <= dist; step++ {
+                i32 col = blank_col + step;
+                out_queue[count] = tile_row * side + col;
+                count++;
+            }
+            return count;
+        }
+    }
+
+    if tile_col == blank_col {
+        if tile_row < blank_row {
+            i32 dist = blank_row - tile_row;
+            for i32 step = 1; step <= dist; step++ {
+                i32 row = blank_row - step;
+                out_queue[count] = row * side + tile_col;
+                count++;
+            }
+            return count;
+        }
+
+        if tile_row > blank_row {
+            i32 dist = tile_row - blank_row;
+            for i32 step = 1; step <= dist; step++ {
+                i32 row = blank_row + step;
+                out_queue[count] = row * side + tile_col;
+                count++;
+            }
+            return count;
+        }
+    }
+
+    return 0;
+}
+
+fun side_label(self: i32) >> ptr<u8> {
+    if self == 3 { return "Board: 3x3"; }
+    if self == 4 { return "Board: 4x4"; }
+    if self == 5 { return "Board: 5x5"; }
+    return "Board: 6x6";
+}
+
+fun format_elapsed(total_sec: i32) >> ptr<u8> {
+    ptr<u8> out = &_time_text[0];
+    out[0] = 0;
+
+    i32 minutes = total_sec / 60;
+    i32 seconds = total_sec % 60;
+
+    strcat(out, itoa(minutes));
+    strcat(out, ":");
+    if seconds < 10 {
+        strcat(out, "0");
+    }
+    strcat(out, itoa(seconds));
+    return out;
+}
+
+fun draw_tile(x: i32, y: i32, side: i32, value: i32, expected_idx: i32, highlight: bool, theme_idx: i32) >> void {
+    bool in_place = (value - 1) == expected_idx;
+
+    Color tile_base = Color{r = 44, g = 132, b = 240, a = 255};
+    Color tile_ok = Color{r = 44, g = 176, b = 110, a = 255};
+    Color tile_hi = Color{r = 252, g = 178, b = 70, a = 255};
+    Color border = Color{r = 235, g = 244, b = 255, a = 170};
+    Color txt_color = Color{r = 245, g = 250, b = 255, a = 255};
+
+    if theme_idx == 1 {
+        tile_base = Color{r = 218, g = 58, b = 174, a = 255};
+        tile_ok = Color{r = 94, g = 226, b = 193, a = 255};
+        tile_hi = Color{r = 255, g = 114, b = 224, a = 255};
+        border = Color{r = 255, g = 176, b = 238, a = 200};
+        txt_color = Color{r = 28, g = 6, b = 26, a = 255};
+    }
+
+    if theme_idx == 2 {
+        tile_base = Color{r = 22, g = 170, b = 130, a = 255};
+        tile_ok = Color{r = 88, g = 188, b = 78, a = 255};
+        tile_hi = Color{r = 255, g = 214, b = 94, a = 255};
+        border = Color{r = 216, g = 255, b = 242, a = 180};
+        txt_color = Color{r = 232, g = 255, b = 246, a = 255};
+    }
+
+    Color tile_bg = tile_base;
+    if in_place {
+        tile_bg = tile_ok;
+    }
+    if highlight {
+        tile_bg = tile_hi;
+    }
+
+    DrawRectangle(x, y, side, side, tile_bg);
+    DrawRectangle(x, y, side, 2, border);
+    DrawRectangle(x, y + side - 2, side, 2, border);
+    DrawRectangle(x, y, 2, side, border);
+    DrawRectangle(x + side - 2, y, 2, side, border);
+
+    ptr<u8> text = itoa(value);
+    i32 fs = side / 2;
+    if fs < 22 { fs = 22; }
+    i32 tw = MeasureText(text, fs);
+    i32 tx = x + ((side - tw) / 2);
+    i32 ty = y + (side / 2) - (fs / 2) + 2;
+    DrawText(text, tx, ty, fs, txt_color);
+}
+
+fun draw_board(self: ptr<i32>, side: i32, layout: Layout, animating: bool, anim_from: i32, anim_to: i32, anim_value: i32, anim_t: f32, theme_idx: i32) >> void {
+    Color board_bg = Color{r = 12, g = 18, b = 34, a = 230};
+    Color board_line = Color{r = 104, g = 122, b = 178, a = 200};
+
+    if theme_idx == 1 {
+        board_bg = Color{r = 30, g = 8, b = 33, a = 230};
+        board_line = Color{r = 236, g = 96, b = 210, a = 220};
+    }
+
+    if theme_idx == 2 {
+        board_bg = Color{r = 8, g = 30, b = 26, a = 230};
+        board_line = Color{r = 98, g = 220, b = 184, a = 220};
+    }
+
+    DrawRectangle(layout.x, layout.y, layout.board_px, layout.board_px, board_bg);
+    DrawRectangle(layout.x, layout.y, layout.board_px, 2, board_line);
+    DrawRectangle(layout.x, layout.y + layout.board_px - 2, layout.board_px, 2, board_line);
+    DrawRectangle(layout.x, layout.y, 2, layout.board_px, board_line);
+    DrawRectangle(layout.x + layout.board_px - 2, layout.y, 2, layout.board_px, board_line);
+
+    i32 count = side.cell_count();
+    for i32 idx = 0; idx < count; idx++ {
+        i32 value = self[idx];
+        if value == 0 { continue; }
+        if animating && idx == anim_from { continue; }
+
+        i32 row = idx / side;
+        i32 col = idx % side;
+        draw_tile(layout.tile_x(col), layout.tile_y(row), layout.cell, value, idx, false, theme_idx);
+    }
+
+    if animating {
+        i32 from_row = anim_from / side;
+        i32 from_col = anim_from % side;
+        i32 to_row = anim_to / side;
+        i32 to_col = anim_to % side;
+
+        f32 fx = layout.tile_x(from_col) as _;
+        f32 fy = layout.tile_y(from_row) as _;
+        f32 tx = layout.tile_x(to_col) as _;
+        f32 ty = layout.tile_y(to_row) as _;
+
+        i32 draw_x = lerpF32(fx, tx, anim_t) as _;
+        i32 draw_y = lerpF32(fy, ty, anim_t) as _;
+        draw_tile(draw_x, draw_y, layout.cell, anim_value, anim_to, true, theme_idx);
+    }
+}
+
+fun reset_game(self: ptr<i32>, side: i32, blank_idx: ptr<i32>, moves: ptr<i32>, solved: ptr<bool>, timer_started: ptr<bool>, start_time: ptr<i64>, finish_time: ptr<i64>, animating: ptr<bool>, anim_t: ptr<f32>, queue_len: ptr<i32>, queue_pos: ptr<i32>) >> void {
+    blank_idx[0] = self.board_shuffle(side);
+    moves[0] = 0;
+    solved[0] = false;
+    timer_started[0] = false;
+    start_time[0] = 0;
+    finish_time[0] = 0;
+    animating[0] = false;
+    anim_t[0] = 0.0;
+    queue_len[0] = 0;
+    queue_pos[0] = 0;
+}
+
+fun start_queue_animation(self: ptr<i32>, blank_idx: i32, queue: ptr<i32>, queue_pos: i32, animating: ptr<bool>, anim_from: ptr<i32>, anim_to: ptr<i32>, anim_value: ptr<i32>, anim_t: ptr<f32>) >> void {
+    anim_from[0] = queue[queue_pos];
+    anim_to[0] = blank_idx;
+    anim_value[0] = self[anim_from[0]];
+    anim_t[0] = 0.0;
+    animating[0] = true;
+}
+
+fun main() >> i32 {
+    SetConfigFlags(FLAG_MSAA_4X_HINT as u32);
+    InitWindow(920, 980, "zlang + raylib - fifteen puzzle");
+    SetTargetFPS(60);
+
+    arr<i32, 36> board = {0};
+    ptr<i32> board_ptr = &board[0];
+
+    i32 board_side = 4;
+    i32 blank_idx = 0;
+    i32 moves = 0;
+
+    bool solved = false;
+    bool timer_started = false;
+    i64 start_time = 0;
+    i64 finish_time = 0;
+
+    bool animating = false;
+    i32 anim_from = 0;
+    i32 anim_to = 0;
+    i32 anim_value = 0;
+    f32 anim_t = 0.0;
+
+    arr<i32, 36> move_queue = {0};
+    i32 move_queue_len = 0;
+    i32 move_queue_pos = 0;
+
+    i32 theme_idx = 0;
+
+    board_ptr.reset_game(board_side, &blank_idx, &moves, &solved, &timer_started, &start_time, &finish_time, &animating, &anim_t, &move_queue_len, &move_queue_pos);
+
+    bool exiting = WindowShouldClose();
+    for (exiting != true) {
+        i32 screen_w = GetScreenWidth();
+        i32 screen_h = GetScreenHeight();
+        Layout layout = board_side.compute_layout(screen_w, screen_h);
+
+        if IsKeyPressed(KEY_N) || IsKeyPressed(KEY_R) {
+            board_ptr.reset_game(board_side, &blank_idx, &moves, &solved, &timer_started, &start_time, &finish_time, &animating, &anim_t, &move_queue_len, &move_queue_pos);
+        }
+
+        if IsKeyPressed(KEY_T) {
+            theme_idx++;
+            if theme_idx > 2 { theme_idx = 0; }
+        }
+
+        if IsKeyPressed(KEY_THREE) {
+            board_side = 3;
+            board_ptr.reset_game(board_side, &blank_idx, &moves, &solved, &timer_started, &start_time, &finish_time, &animating, &anim_t, &move_queue_len, &move_queue_pos);
+        }
+        if IsKeyPressed(KEY_FOUR) {
+            board_side = 4;
+            board_ptr.reset_game(board_side, &blank_idx, &moves, &solved, &timer_started, &start_time, &finish_time, &animating, &anim_t, &move_queue_len, &move_queue_pos);
+        }
+        if IsKeyPressed(KEY_FIVE) {
+            board_side = 5;
+            board_ptr.reset_game(board_side, &blank_idx, &moves, &solved, &timer_started, &start_time, &finish_time, &animating, &anim_t, &move_queue_len, &move_queue_pos);
+        }
+        if IsKeyPressed(KEY_SIX) {
+            board_side = 6;
+            board_ptr.reset_game(board_side, &blank_idx, &moves, &solved, &timer_started, &start_time, &finish_time, &animating, &anim_t, &move_queue_len, &move_queue_pos);
+        }
+
+        if IsKeyPressed(KEY_MINUS) || IsKeyPressed(KEY_KP_SUBTRACT) {
+            board_side = clampI32(board_side - 1, MIN_SIDE, MAX_SIDE);
+            board_ptr.reset_game(board_side, &blank_idx, &moves, &solved, &timer_started, &start_time, &finish_time, &animating, &anim_t, &move_queue_len, &move_queue_pos);
+        }
+        if IsKeyPressed(KEY_EQUAL) || IsKeyPressed(KEY_KP_ADD) {
+            board_side = clampI32(board_side + 1, MIN_SIDE, MAX_SIDE);
+            board_ptr.reset_game(board_side, &blank_idx, &moves, &solved, &timer_started, &start_time, &finish_time, &animating, &anim_t, &move_queue_len, &move_queue_pos);
+        }
+
+        i32 btn_y = 86;
+        i32 new_x = layout.x;
+        i32 new_w = 140;
+        i32 size_x = new_x + new_w + 20;
+        i32 size_w = 56;
+
+        if IsMouseButtonPressed(MOUSE_BUTTON_LEFT) {
+            i32 mx = GetMouseX();
+            i32 my = GetMouseY();
+
+            if point_in_rect(mx, my, new_x, btn_y, new_w, 42) {
+                board_ptr.reset_game(board_side, &blank_idx, &moves, &solved, &timer_started, &start_time, &finish_time, &animating, &anim_t, &move_queue_len, &move_queue_pos);
+            } else if point_in_rect(mx, my, size_x, btn_y, size_w, 42) {
+                board_side = clampI32(board_side - 1, MIN_SIDE, MAX_SIDE);
+                board_ptr.reset_game(board_side, &blank_idx, &moves, &solved, &timer_started, &start_time, &finish_time, &animating, &anim_t, &move_queue_len, &move_queue_pos);
+            } else if point_in_rect(mx, my, size_x + size_w + 8, btn_y, size_w, 42) {
+                board_side = clampI32(board_side + 1, MIN_SIDE, MAX_SIDE);
+                board_ptr.reset_game(board_side, &blank_idx, &moves, &solved, &timer_started, &start_time, &finish_time, &animating, &anim_t, &move_queue_len, &move_queue_pos);
+            } else if !animating && !solved {
+                i32 idx = layout.tile_at_pixel(mx, my, board_side);
+                if idx >= 0 && board[idx] != 0 {
+                    move_queue_len = blank_idx.build_line_move_queue(idx, board_side, &move_queue[0]);
+                }
+
+                if move_queue_len > 0 {
+                    if !timer_started {
+                        timer_started = true;
+                        start_time = now();
+                    }
+                    move_queue_pos = 0;
+                    board_ptr.start_queue_animation(blank_idx, &move_queue[0], move_queue_pos, &animating, &anim_from, &anim_to, &anim_value, &anim_t);
+                }
+            }
+        }
+
+        if !animating && !solved {
+            i32 blank_col = blank_idx.col_of(board_side);
+            i32 blank_row = blank_idx.row_of(board_side);
+            i32 tile_idx = -1;
+
+            if IsKeyPressed(KEY_LEFT) && blank_col < board_side - 1 {
+                tile_idx = blank_idx + 1;
+            }
+            if IsKeyPressed(KEY_RIGHT) && blank_col > 0 {
+                tile_idx = blank_idx - 1;
+            }
+            if IsKeyPressed(KEY_UP) && blank_row < board_side - 1 {
+                tile_idx = blank_idx + board_side;
+            }
+            if IsKeyPressed(KEY_DOWN) && blank_row > 0 {
+                tile_idx = blank_idx - board_side;
+            }
+
+            if tile_idx >= 0 && board[tile_idx] != 0 {
+                if !timer_started {
+                    timer_started = true;
+                    start_time = now();
+                }
+                move_queue_len = 1;
+                move_queue_pos = 0;
+                move_queue[0] = tile_idx;
+                board_ptr.start_queue_animation(blank_idx, &move_queue[0], move_queue_pos, &animating, &anim_from, &anim_to, &anim_value, &anim_t);
+            }
+        }
+
+        if animating {
+            anim_t += GetFrameTime() * ANIM_SPEED;
+            if anim_t >= 1.0 {
+                board[anim_to] = anim_value;
+                board[anim_from] = 0;
+                blank_idx = anim_from;
+                moves++;
+
+                move_queue_pos++;
+
+                if move_queue_pos < move_queue_len {
+                    board_ptr.start_queue_animation(blank_idx, &move_queue[0], move_queue_pos, &animating, &anim_from, &anim_to, &anim_value, &anim_t);
+                } else {
+                    animating = false;
+                    anim_t = 0.0;
+                    move_queue_len = 0;
+                    move_queue_pos = 0;
+
+                    if board_ptr.board_is_solved(board_side) {
+                        solved = true;
+                        finish_time = now();
+                    }
+                }
+            }
+        }
+
+        i32 elapsed = 0;
+        if timer_started {
+            i64 now_sec = now();
+            if solved { now_sec = finish_time; }
+            i64 dt = now_sec - start_time;
+            if dt < 0 { dt = 0; }
+            elapsed = dt as i32;
+        }
+
+        Color bg_clear = Color{r = 10, g = 14, b = 26, a = 255};
+        Color bg_top = Color{r = 30, g = 38, b = 63, a = 255};
+        Color bg_bottom = Color{r = 8, g = 10, b = 18, a = 255};
+        Color title_color = Color{r = 236, g = 244, b = 255, a = 255};
+        Color subtitle_color = Color{r = 156, g = 176, b = 220, a = 255};
+        Color btn_new = Color{r = 45, g = 138, b = 255, a = 240};
+        Color btn_soft = Color{r = 88, g = 102, b = 140, a = 220};
+        Color btn_text = Color{r = 245, g = 250, b = 255, a = 255};
+        Color label_color = Color{r = 200, g = 214, b = 255, a = 255};
+        Color help_color = Color{r = 220, g = 234, b = 255, a = 255};
+        Color help_dim = Color{r = 164, g = 182, b = 224, a = 255};
+        Color overlay = Color{r = 6, g = 10, b = 22, a = 170};
+        Color solved_color = Color{r = 136, g = 255, b = 182, a = 255};
+        Color solved_hint = Color{r = 180, g = 206, b = 255, a = 255};
+
+        if theme_idx == 1 {
+            bg_clear = Color{r = 16, g = 4, b = 24, a = 255};
+            bg_top = Color{r = 62, g = 10, b = 78, a = 255};
+            bg_bottom = Color{r = 10, g = 2, b = 16, a = 255};
+            title_color = Color{r = 255, g = 192, b = 244, a = 255};
+            subtitle_color = Color{r = 248, g = 142, b = 228, a = 255};
+            btn_new = Color{r = 255, g = 72, b = 196, a = 240};
+            btn_soft = Color{r = 128, g = 50, b = 148, a = 220};
+            btn_text = Color{r = 255, g = 230, b = 250, a = 255};
+            label_color = Color{r = 255, g = 176, b = 236, a = 255};
+            help_color = Color{r = 255, g = 214, b = 246, a = 255};
+            help_dim = Color{r = 218, g = 140, b = 206, a = 255};
+            overlay = Color{r = 12, g = 2, b = 18, a = 180};
+            solved_color = Color{r = 126, g = 255, b = 220, a = 255};
+            solved_hint = Color{r = 232, g = 180, b = 255, a = 255};
+        }
+
+        if theme_idx == 2 {
+            bg_clear = Color{r = 6, g = 22, b = 18, a = 255};
+            bg_top = Color{r = 16, g = 64, b = 54, a = 255};
+            bg_bottom = Color{r = 4, g = 16, b = 14, a = 255};
+            title_color = Color{r = 207, g = 255, b = 233, a = 255};
+            subtitle_color = Color{r = 136, g = 236, b = 208, a = 255};
+            btn_new = Color{r = 24, g = 198, b = 140, a = 240};
+            btn_soft = Color{r = 34, g = 120, b = 98, a = 220};
+            btn_text = Color{r = 222, g = 255, b = 243, a = 255};
+            label_color = Color{r = 176, g = 255, b = 225, a = 255};
+            help_color = Color{r = 214, g = 255, b = 238, a = 255};
+            help_dim = Color{r = 130, g = 220, b = 192, a = 255};
+            overlay = Color{r = 2, g = 14, b = 12, a = 175};
+            solved_color = Color{r = 160, g = 255, b = 194, a = 255};
+            solved_hint = Color{r = 198, g = 255, b = 228, a = 255};
+        }
+
+        i32 info_y = layout.y + layout.board_px + 16;
+        i32 info_line1 = 21;
+        i32 info_line2 = 19;
+        i32 info_line3 = 19;
+        i32 info_line4 = 19;
+
+        BeginDrawing();
+        ClearBackground(bg_clear);
+        DrawRectangleGradientV(0, 0, screen_w, screen_h, bg_top, bg_bottom);
+
+        DrawText("FIFTEEN PUZZLE", layout.x, 26, 42, title_color);
+        DrawText("zlang + raylib-zl demo", layout.x, 62, 20, subtitle_color);
+
+        DrawRectangle(new_x, btn_y, new_w, 42, btn_new);
+        DrawText("NEW GAME", new_x + 18, btn_y + 11, 20, btn_text);
+
+        DrawRectangle(size_x, btn_y, size_w, 42, btn_soft);
+        DrawText("-", size_x + 21, btn_y + 7, 30, btn_text);
+        DrawRectangle(size_x + size_w + 8, btn_y, size_w, 42, btn_soft);
+        DrawText("+", size_x + size_w + 26, btn_y + 7, 30, btn_text);
+
+        DrawText(board_side.side_label(), size_x + size_w + 78, btn_y + 10, 24, label_color);
+        DrawText("Click any tile in blank row/column to slide a full line.", layout.x, info_y, info_line1, help_color);
+        DrawText("Arrows: one step. 3..6 / +/- size. N or R new game.", layout.x, info_y + info_line1 + 8, info_line2, help_dim);
+        DrawText("Press T to switch theme.", layout.x, info_y + info_line1 + info_line2 + 18, info_line3, help_dim);
+        DrawText(theme_idx.theme_label(), layout.x, info_y + info_line1 + info_line2 + info_line3 + 26, info_line4, label_color);
+
+        board_ptr.draw_board(board_side, layout, animating, anim_from, anim_to, anim_value, anim_t, theme_idx);
+
+        if solved {
+            DrawRectangle(0, 0, screen_w, screen_h, overlay);
+
+            ptr<u8> line1 = "Solved!";
+            ptr<u8> line2 = "Press N for a new game";
+            ptr<u8> line3 = "Time:";
+            ptr<u8> line4 = format_elapsed(elapsed);
+
+            i32 s1 = 64;
+            i32 s2 = 30;
+            i32 s3 = 28;
+
+            i32 w1 = MeasureText(line1, s1);
+            i32 w2 = MeasureText(line2, s2);
+            i32 w3 = MeasureText(line3, s3);
+            i32 w4 = MeasureText(line4, s3);
+
+            i32 cy = screen_h / 2;
+            DrawText(line1, (screen_w - w1) / 2, cy - 76, s1, solved_color);
+            DrawText(line2, (screen_w - w2) / 2, cy + 6, s2, solved_hint);
+            DrawText(line3, (screen_w - w3) / 2, cy + 44, s3, solved_hint);
+            DrawText(line4, (screen_w - w4) / 2, cy + 78, s3, solved_color);
+        }
+
+        i32 move_label_val = moves;
+        DrawText(itoa(move_label_val), screen_w - 120, 20, 26, label_color);
+        DrawText(format_elapsed(elapsed), screen_w - 120, 44, 28, label_color);
+        DrawFPS(screen_w - 108, 78);
+
+        EndDrawing();
+        exiting = WindowShouldClose();
+    }
+
+    CloseWindow();
+    return 0;
+}
