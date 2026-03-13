@@ -1,5 +1,4 @@
 use raylib
-use std.string
 use std.time
 
 const i32 MIN_SIDE = 3;
@@ -14,11 +13,9 @@ struct Layout {
     board_px i32
 }
 
-arr<u8, 24> _time_text = {0};
-
-fun theme_label(self: i32) >> ptr<u8> {
+fun theme_label(theme_id: i32) >> ptr<u8> {
     arr<ptr<u8>, 3> labels = {"Theme: Deep Space", "Theme: Neon Rose", "Theme: Mint Terminal"}; 
-    return labels[self % 3];
+    return labels[theme_id % 3];
 }
 
 fun minI32(a: i32, b: i32) >> i32 {
@@ -46,49 +43,49 @@ fun lerpF32(a: f32, b: f32, t: f32) >> f32 {
     return a + ((b - a) * t);
 }
 
-fun cell_count(self: i32) >> i32 {
-    return self * self;
+fun cell_count(side: i32) >> i32 {
+    return side * side;
 }
 
-fun row_of(self: i32, side: i32) >> i32 {
-    return self / side;
+fun row_of(idx: i32, side: i32) >> i32 {
+    return idx / side;
 }
 
-fun col_of(self: i32, side: i32) >> i32 {
-    return self % side;
+fun col_of(idx: i32, side: i32) >> i32 {
+    return idx % side;
 }
 
-fun is_adjacent(self: i32, other: i32, side: i32) >> bool {
-    i32 dr = absI32(self.row_of(side) - other.row_of(side));
-    i32 dc = absI32(self.col_of(side) - other.col_of(side));
+fun is_adjacent(a: i32, other: i32, side: i32) >> bool {
+    i32 dr = absI32(a.row_of(side) - other.row_of(side));
+    i32 dc = absI32(a.col_of(side) - other.col_of(side));
     return (dr + dc) == 1;
 }
 
-fun board_init_solved(self: ptr<i32>, side: i32) >> i32 {
+fun board_init_solved(board: ptr<i32>, side: i32) >> i32 {
     i32 count = side.cell_count();
     for i32 i = 0; i < 36; i++ {
-        self[i] = 0;
+        board[i] = 0;
     }
     for i32 i = 0; i < count - 1; i++ {
-        self[i] = i + 1;
+        board[i] = i + 1;
     }
-    self[count - 1] = 0;
+    board[count - 1] = 0;
     return count - 1;
 }
 
-fun board_is_solved(self: ptr<i32>, side: i32) >> bool {
+fun board_is_solved(board: ptr<i32>, side: i32) >> bool {
     i32 count = side.cell_count();
     for i32 i = 0; i < count - 1; i++ {
-        if self[i] != (i + 1) {
+        if board[i] != (i + 1) {
             return false;
         }
     }
-    return self[count - 1] == 0;
+    return board[count - 1] == 0;
 }
 
-fun board_apply_move(self: ptr<i32>, blank_idx: i32, tile_idx: i32) >> i32 {
-    self[blank_idx] = self[tile_idx];
-    self[tile_idx] = 0;
+fun board_apply_move(board: ptr<i32>, blank_idx: i32, tile_idx: i32) >> i32 {
+    board[blank_idx] = board[tile_idx];
+    board[tile_idx] = 0;
     return tile_idx;
 }
 
@@ -132,27 +129,27 @@ fun random_neighbor(blank_idx: i32, side: i32, prev_blank: i32) >> i32 {
     return chosen;
 }
 
-fun board_shuffle(self: ptr<i32>, side: i32) >> i32 {
-    i32 blank = self.board_init_solved(side);
+fun board_shuffle(board: ptr<i32>, side: i32) >> i32 {
+    i32 blank = board.board_init_solved(side);
     i32 prev_blank = -1;
     i32 steps = side.cell_count() * side.cell_count() * 14;
 
     for i32 i = 0; i < steps; i++ {
         i32 old_blank = blank;
         i32 tile = random_neighbor(blank, side, prev_blank);
-        blank = self.board_apply_move(blank, tile);
+        blank = board.board_apply_move(blank, tile);
         prev_blank = old_blank;
     }
 
-    if self.board_is_solved(side) {
+    if board.board_is_solved(side) {
         i32 tile = random_neighbor(blank, side, -1);
-        blank = self.board_apply_move(blank, tile);
+        blank = board.board_apply_move(blank, tile);
     }
 
     return blank;
 }
 
-fun compute_layout(self: i32, screen_w: i32, screen_h: i32) >> Layout {
+fun compute_layout(side: i32, screen_w: i32, screen_h: i32) >> Layout {
     Layout layout;
     layout.gap = 8;
 
@@ -161,30 +158,30 @@ fun compute_layout(self: i32, screen_w: i32, screen_h: i32) >> Layout {
     i32 target = minI32(available_w, available_h);
     target = maxI32(target, 280);
 
-    i32 cell = (target - (layout.gap * (self + 1))) / self;
+    i32 cell = (target - (layout.gap * (side + 1))) / side;
     cell = maxI32(cell, 24);
 
     layout.cell = cell;
-    layout.board_px = (cell * self) + (layout.gap * (self + 1));
+    layout.board_px = (cell * side) + (layout.gap * (side + 1));
     layout.x = (screen_w - layout.board_px) / 2;
     layout.y = 150;
     return layout;
 }
 
-fun tile_x(self: Layout, col: i32) >> i32 {
-    return self.x + self.gap + (col * (self.cell + self.gap));
+fun tile_x(layout: Layout, col: i32) >> i32 {
+    return layout.x + layout.gap + (col * (layout.cell + layout.gap));
 }
 
-fun tile_y(self: Layout, row: i32) >> i32 {
-    return self.y + self.gap + (row * (self.cell + self.gap));
+fun tile_y(layout: Layout, row: i32) >> i32 {
+    return layout.y + layout.gap + (row * (layout.cell + layout.gap));
 }
 
-fun tile_at_pixel(self: Layout, mx: i32, my: i32, side: i32) >> i32 {
+fun tile_at_pixel(layout: Layout, mx: i32, my: i32, side: i32) >> i32 {
     for i32 row = 0; row < side; row++ {
         for i32 col = 0; col < side; col++ {
-            i32 x = self.tile_x(col);
-            i32 y = self.tile_y(row);
-            if mx >= x && mx <= (x + self.cell) && my >= y && my <= (y + self.cell) {
+            i32 x = layout.tile_x(col);
+            i32 y = layout.tile_y(row);
+            if mx >= x && mx <= (x + layout.cell) && my >= y && my <= (y + layout.cell) {
                 return (row * side) + col;
             }
         }
@@ -198,13 +195,13 @@ fun point_in_rect(px: i32, py: i32, rx: i32, ry: i32, rw: i32, rh: i32) >> bool 
     return true;
 }
 
-fun build_line_move_queue(self: i32, tile_idx: i32, side: i32, out_queue: ptr<i32>) >> i32 {
-    if tile_idx == self { return 0; }
+fun build_line_move_queue(blank_idx: i32, tile_idx: i32, side: i32, out_queue: ptr<i32>) >> i32 {
+    if tile_idx == blank_idx { return 0; }
 
     i32 tile_row = tile_idx.row_of(side);
     i32 tile_col = tile_idx.col_of(side);
-    i32 blank_row = self.row_of(side);
-    i32 blank_col = self.col_of(side);
+    i32 blank_row = blank_idx.row_of(side);
+    i32 blank_col = blank_idx.col_of(side);
     i32 count = 0;
 
     if tile_row == blank_row {
@@ -254,27 +251,18 @@ fun build_line_move_queue(self: i32, tile_idx: i32, side: i32, out_queue: ptr<i3
     return 0;
 }
 
-fun side_label(self: i32) >> ptr<u8> {
-    if self == 3 { return "Board: 3x3"; }
-    if self == 4 { return "Board: 4x4"; }
-    if self == 5 { return "Board: 5x5"; }
-    return "Board: 6x6";
+fun side_label(side: i32) >> ptr<u8> {
+    return "Board: ${side}x${side}";
 }
 
 fun format_elapsed(total_sec: i32) >> ptr<u8> {
-    ptr<u8> out = &_time_text[0];
-    out[0] = 0;
-
     i32 minutes = total_sec / 60;
     i32 seconds = total_sec % 60;
 
-    strcat(out, itoa(minutes));
-    strcat(out, ":");
     if seconds < 10 {
-        strcat(out, "0");
+        return "${minutes}:0${seconds}";
     }
-    strcat(out, itoa(seconds));
-    return out;
+    return "${minutes}:${seconds}";
 }
 
 fun draw_tile(x: i32, y: i32, side: i32, value: i32, expected_idx: i32, highlight: bool, theme_idx: i32) >> void {
@@ -316,7 +304,7 @@ fun draw_tile(x: i32, y: i32, side: i32, value: i32, expected_idx: i32, highligh
     DrawRectangle(x, y, 2, side, border);
     DrawRectangle(x + side - 2, y, 2, side, border);
 
-    ptr<u8> text = itoa(value);
+    ptr<u8> text = "${value}";
     i32 fs = side / 2;
     if fs < 22 { fs = 22; }
     i32 tw = MeasureText(text, fs);
@@ -325,7 +313,7 @@ fun draw_tile(x: i32, y: i32, side: i32, value: i32, expected_idx: i32, highligh
     DrawText(text, tx, ty, fs, txt_color);
 }
 
-fun draw_board(self: ptr<i32>, side: i32, layout: Layout, animating: bool, anim_from: i32, anim_to: i32, anim_value: i32, anim_t: f32, theme_idx: i32) >> void {
+fun draw_board(board: ptr<i32>, side: i32, layout: Layout, animating: bool, anim_from: i32, anim_to: i32, anim_value: i32, anim_t: f32, theme_idx: i32) >> void {
     Color board_bg = Color{r = 12, g = 18, b = 34, a = 230};
     Color board_line = Color{r = 104, g = 122, b = 178, a = 200};
 
@@ -347,7 +335,7 @@ fun draw_board(self: ptr<i32>, side: i32, layout: Layout, animating: bool, anim_
 
     i32 count = side.cell_count();
     for i32 idx = 0; idx < count; idx++ {
-        i32 value = self[idx];
+        i32 value = board[idx];
         if value == 0 { continue; }
         if animating && idx == anim_from { continue; }
 
@@ -373,8 +361,8 @@ fun draw_board(self: ptr<i32>, side: i32, layout: Layout, animating: bool, anim_
     }
 }
 
-fun reset_game(self: ptr<i32>, side: i32, blank_idx: ptr<i32>, moves: ptr<i32>, solved: ptr<bool>, timer_started: ptr<bool>, start_time: ptr<i64>, finish_time: ptr<i64>, animating: ptr<bool>, anim_t: ptr<f32>, queue_len: ptr<i32>, queue_pos: ptr<i32>) >> void {
-    blank_idx[0] = self.board_shuffle(side);
+fun reset_game(board: ptr<i32>, side: i32, blank_idx: ptr<i32>, moves: ptr<i32>, solved: ptr<bool>, timer_started: ptr<bool>, start_time: ptr<i64>, finish_time: ptr<i64>, animating: ptr<bool>, anim_t: ptr<f32>, queue_len: ptr<i32>, queue_pos: ptr<i32>) >> void {
+    blank_idx[0] = board.board_shuffle(side);
     moves[0] = 0;
     solved[0] = false;
     timer_started[0] = false;
@@ -386,10 +374,10 @@ fun reset_game(self: ptr<i32>, side: i32, blank_idx: ptr<i32>, moves: ptr<i32>, 
     queue_pos[0] = 0;
 }
 
-fun start_queue_animation(self: ptr<i32>, blank_idx: i32, queue: ptr<i32>, queue_pos: i32, animating: ptr<bool>, anim_from: ptr<i32>, anim_to: ptr<i32>, anim_value: ptr<i32>, anim_t: ptr<f32>) >> void {
+fun start_queue_animation(board: ptr<i32>, blank_idx: i32, queue: ptr<i32>, queue_pos: i32, animating: ptr<bool>, anim_from: ptr<i32>, anim_to: ptr<i32>, anim_value: ptr<i32>, anim_t: ptr<f32>) >> void {
     anim_from[0] = queue[queue_pos];
     anim_to[0] = blank_idx;
-    anim_value[0] = self[anim_from[0]];
+    anim_value[0] = board[anim_from[0]];
     anim_t[0] = 0.0;
     animating[0] = true;
 }
@@ -649,8 +637,7 @@ fun main() >> i32 {
 
             ptr<u8> line1 = "Solved!";
             ptr<u8> line2 = "Press N for a new game";
-            ptr<u8> line3 = "Time:";
-            ptr<u8> line4 = format_elapsed(elapsed);
+            ptr<u8> line3 = "Time: ${format_elapsed(elapsed)}";
 
             i32 s1 = 64;
             i32 s2 = 30;
@@ -659,18 +646,17 @@ fun main() >> i32 {
             i32 w1 = MeasureText(line1, s1);
             i32 w2 = MeasureText(line2, s2);
             i32 w3 = MeasureText(line3, s3);
-            i32 w4 = MeasureText(line4, s3);
 
             i32 cy = screen_h / 2;
             DrawText(line1, (screen_w - w1) / 2, cy - 76, s1, solved_color);
             DrawText(line2, (screen_w - w2) / 2, cy + 6, s2, solved_hint);
-            DrawText(line3, (screen_w - w3) / 2, cy + 44, s3, solved_hint);
-            DrawText(line4, (screen_w - w4) / 2, cy + 78, s3, solved_color);
+            DrawText(line3, (screen_w - w3) / 2, cy + 56, s3, solved_color);
         }
 
-        i32 move_label_val = moves;
-        DrawText(itoa(move_label_val), screen_w - 120, 20, 26, label_color);
-        DrawText(format_elapsed(elapsed), screen_w - 120, 44, 28, label_color);
+        ptr<u8> hud_moves = "Moves: ${moves}";
+        ptr<u8> hud_time = "Time: ${format_elapsed(elapsed)}";
+        DrawText(hud_moves, screen_w - 230, 20, 24, label_color);
+        DrawText(hud_time, screen_w - 230, 48, 24, label_color);
         DrawFPS(screen_w - 108, 78);
 
         EndDrawing();
